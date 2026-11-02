@@ -1,0 +1,77 @@
+# Continuous integration: every pull request and every push to main/development must pass
+# lint, format and build before it can be merged (enforced by the repository ruleset).
+#
+# The single job is named "build" on purpose: the ruleset requires a check with exactly that name.
+# Steps for api/, web/ and extension/ only run once those folders exist (they arrive in Sprint 1).
+name: CI
+
+on:
+  pull_request:
+    branches: [main, development]
+  push:
+    branches: [main, development]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to the same branch cancels the run that is still going.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      # ---------- Shared JavaScript / TypeScript tooling (repo root) ----------
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install lint and format tools
+        run: npm ci
+
+      - name: Check formatting (Prettier)
+        run: npm run format:check
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      # ---------- Web app ----------
+      - name: Build web app
+        if: hashFiles('web/package.json') != ''
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+
+      # ---------- Browser extension ----------
+      - name: Build browser extension
+        if: hashFiles('extension/package.json') != ''
+        working-directory: extension
+        run: |
+          npm ci
+          npm run build
+
+      # ---------- API ----------
+      - name: Set up .NET
+        if: hashFiles('api/**/*.csproj') != ''
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build, check format and test the API
+        if: hashFiles('api/**/*.csproj') != ''
+        working-directory: api
+        run: |
+          dotnet restore
+          dotnet format --verify-no-changes --no-restore
+          dotnet build --no-restore --configuration Release
+          dotnet test --no-build --configuration Release

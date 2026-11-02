@@ -23,14 +23,14 @@ Job application tracker: a browser extension that saves the job post you are loo
 
 ## Tech stack
 
-| Part | Technology |
-|---|---|
-| Web app | React, Vite, TypeScript |
-| Browser extension | TypeScript, Manifest V3 (Chrome and Edge) |
-| API | ASP.NET Core Web API (.NET 10), Entity Framework Core, JWT, Swagger |
-| Database | PostgreSQL |
-| Tests | xUnit (API), Vitest (web app and extension) |
-| CI | GitHub Actions |
+| Part              | Technology                                                          |
+| ----------------- | ------------------------------------------------------------------- |
+| Web app           | React, Vite, TypeScript                                             |
+| Browser extension | TypeScript, Manifest V3 (Chrome and Edge)                           |
+| API               | ASP.NET Core Web API (.NET 10), Entity Framework Core, JWT, Swagger |
+| Database          | PostgreSQL                                                          |
+| Tests             | xUnit (API), Vitest (web app and extension)                         |
+| CI                | GitHub Actions                                                      |
 
 ## Repository structure
 

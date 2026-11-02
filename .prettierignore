@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+package-lock.json
+
+# C# is formatted by `dotnet format`, not Prettier
+api/**/bin/
+api/**/obj/
+*.cs
