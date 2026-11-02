@@ -1,0 +1,32 @@
+# Shared editor settings so every IDE uses the same indentation and line endings.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+# ---------- C# (api/) ----------
+[*.{cs,csx}]
+indent_size = 4
+csharp_new_line_before_open_brace = all
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_prefer_braces = true:warning
+dotnet_sort_system_directives_first = true
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_readonly_field = true:warning
+
+[*.{csproj,props,targets,sln}]
+indent_size = 2
+
+[*.sln]
+end_of_line = crlf
+indent_style = tab
