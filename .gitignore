@@ -1,0 +1,49 @@
+# ---------- Secrets and local config ----------
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+*.pfx
+*.pem
+
+# ---------- .NET (api/) ----------
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+TestResults/
+*.user
+*.suo
+*.rsuser
+*.userprefs
+.vs/
+*.nupkg
+coverage*.json
+coverage*.xml
+
+# ---------- Node / Vite (web/, extension/) ----------
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+
+# Packed browser extension builds
+*.crx
+*.zip
+
+# ---------- Editors and OS ----------
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
