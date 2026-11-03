@@ -57,3 +57,7 @@ Each team member adds one favorite quote here.
 > Surely he hath borne our griefs, and carried our sorrows: yet we did esteem him stricken, smitten of God, and afflicted. But he was wounded for our transgressions, he was bruised for our iniquities: the chastisement of our peace was upon him; and with his stripes we are healed.
 >
 > Isaiah 53:4-5 (KJV), chosen by Ezequiel Rindello
+
+> And if men come unto me I will show unto them their weakness. I give unto men weakness that they may be humble; and my grace is sufficient for all men that humble themselves before me; for if they humble themselves before me, and have faith in me, then will I make weak things become strong unto them.
+>
+> Ether 12:27 (Book of Mormon), chosen by Vera Antamanova
