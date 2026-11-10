@@ -22,6 +22,131 @@ namespace JobTrail.Api.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("JobTrail.Api.Models.Application", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateOnly?>("AppliedOn")
+                        .HasColumnType("date")
+                        .HasColumnName("applied_on");
+
+                    b.Property<string>("Company")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("company");
+
+                    b.Property<string>("ContactEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("contact_email");
+
+                    b.Property<string>("ContactName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("contact_name");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(100000)
+                        .HasColumnType("character varying(100000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("location");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(10000)
+                        .HasColumnType("character varying(10000)")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("ResumeVersion")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("resume_version");
+
+                    b.Property<string>("SalaryRange")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("salary_range");
+
+                    b.Property<string>("Stage")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("stage");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("Url")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("url");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_applications");
+
+                    b.HasIndex("UserId", "CreatedAt")
+                        .HasDatabaseName("ix_applications_user_id_created_at");
+
+                    b.ToTable("applications", (string)null);
+                });
+
+            modelBuilder.Entity("JobTrail.Api.Models.ApplicationStageChange", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ApplicationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("application_id");
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("changed_at");
+
+                    b.Property<string>("FromStage")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("from_stage");
+
+                    b.Property<string>("ToStage")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("to_stage");
+
+                    b.HasKey("Id")
+                        .HasName("pk_application_stage_changes");
+
+                    b.HasIndex("ApplicationId")
+                        .HasDatabaseName("ix_application_stage_changes_application_id");
+
+                    b.ToTable("application_stage_changes", (string)null);
+                });
+
             modelBuilder.Entity("JobTrail.Api.Models.RevokedToken", b =>
                 {
                     b.Property<Guid>("Jti")
@@ -86,6 +211,26 @@ namespace JobTrail.Api.Data.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("JobTrail.Api.Models.Application", b =>
+                {
+                    b.HasOne("JobTrail.Api.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_applications_users_user_id");
+                });
+
+            modelBuilder.Entity("JobTrail.Api.Models.ApplicationStageChange", b =>
+                {
+                    b.HasOne("JobTrail.Api.Models.Application", null)
+                        .WithMany("StageChanges")
+                        .HasForeignKey("ApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_application_stage_changes_applications_application_id");
+                });
+
             modelBuilder.Entity("JobTrail.Api.Models.RevokedToken", b =>
                 {
                     b.HasOne("JobTrail.Api.Models.User", null)
@@ -94,6 +239,11 @@ namespace JobTrail.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_revoked_tokens_users_user_id");
+                });
+
+            modelBuilder.Entity("JobTrail.Api.Models.Application", b =>
+                {
+                    b.Navigation("StageChanges");
                 });
 #pragma warning restore 612, 618
         }
