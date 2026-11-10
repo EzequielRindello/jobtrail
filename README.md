@@ -36,20 +36,91 @@ Job application tracker: a browser extension that saves the job post you are loo
 
 ```
 jobtrail/
-├── api/         ASP.NET Core Web API
-├── web/         React web app
-└── extension/   Browser extension
+├── api/                   ASP.NET Core Web API
+│   ├── JobTrail.Api/        controllers, services, EF Core models and migrations
+│   └── JobTrail.Api.Tests/  xUnit tests
+├── web/                   React web app
+├── extension/             Browser extension (Sprint 2)
+├── docs/                  Database design and other docs
+└── docker-compose.yml     Local PostgreSQL
 ```
 
 ## Getting started
 
-Setup instructions (prerequisites, database, environment variables and run commands) will be added in Sprint 1, together with the project skeleton.
+### Prerequisites
+
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [Node.js 22](https://nodejs.org/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (runs PostgreSQL), or your own PostgreSQL 16+
+
+### 1. Database
+
+From the repo root, create your `.env` file and choose a password in it:
+
+```bash
+cp .env.example .env
+docker compose up -d
+```
+
+This starts PostgreSQL 17 on **localhost:5433** (5433 so it doesn't clash with a PostgreSQL already installed on 5432). The data is kept in a Docker volume between restarts. `docker compose down` stops it.
+
+### 2. API
+
+Secrets are kept out of the repo with [user-secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets). From `api/`:
+
+```bash
+dotnet tool restore
+dotnet user-secrets set "ConnectionStrings:Default" "Host=localhost;Port=5433;Database=jobtrail;Username=jobtrail;Password=<POSTGRES_PASSWORD from .env>" --project JobTrail.Api
+dotnet user-secrets set "Jwt:Key" "<random string, at least 32 characters>" --project JobTrail.Api
+dotnet run --project JobTrail.Api
+```
+
+To generate a JWT key: `openssl rand -base64 48` (macOS, Linux, Git Bash) or, in PowerShell 7, `[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))`.
+
+The API runs on **http://localhost:5080**. On startup it creates or updates the database tables and, in Development only, a demo user you can log in with right away: `jobtrail@jobtrail.com` / `Password1!`. The interactive API docs are at **http://localhost:5080/swagger**: register or log in there, copy the `token`, click **Authorize** and paste it to try the protected endpoints.
+
+Tests: `dotnet test` from `api/` (they use an in-memory database, so PostgreSQL is not needed).
+
+### 3. Web app
+
+From `web/`:
+
+```bash
+npm install
+npm run dev
+```
+
+The web app runs on **http://localhost:5173** (the API accepts requests from this origin).
+
+### Environment variables (deployment)
+
+Locally everything above is enough. On a server, set these instead of user-secrets:
+
+| Variable                     | Example                                                      |
+| ---------------------------- | ------------------------------------------------------------ |
+| `ConnectionStrings__Default` | `Host=...;Database=...;Username=...;Password=...`            |
+| `Jwt__Key`                   | random string, at least 32 characters                        |
+| `Cors__AllowedOrigins__0`    | URL of the deployed web app, e.g. `https://jobtrail.example` |
+
+## API
+
+All endpoints are documented in Swagger. Sprint 1 covers accounts:
+
+| Endpoint                  | Token | Body                               | Result                                                  |
+| ------------------------- | ----- | ---------------------------------- | ------------------------------------------------------- |
+| `POST /api/auth/register` | no    | `{ email, password, displayName }` | `200` with `{ token, expiresAt, user }`, `409` if taken |
+| `POST /api/auth/login`    | no    | `{ email, password }`              | `200` with `{ token, expiresAt, user }`, `401` if wrong |
+| `POST /api/auth/logout`   | yes   |                                    | `204`. That token stops working; other devices stay in  |
+| `GET /api/auth/me`        | yes   |                                    | `200` with `{ id, email, displayName }`, `401` if not   |
+
+Send the token on every protected request as `Authorization: Bearer <token>`. Tokens last 7 days. Errors use the standard [ProblemDetails](https://www.rfc-editor.org/rfc/rfc9457) JSON format, and validation errors (`400`) list the problem for each field under `errors`.
+
+The database design is described in [docs/database.md](docs/database.md).
 
 ## Team
 
 - Ezequiel Rindello
 - Vera Antamanova
-- Cristian De La Hoz
 
 ## Favorite quotes
 
