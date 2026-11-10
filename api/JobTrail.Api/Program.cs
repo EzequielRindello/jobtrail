@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using JobTrail.Api.Data;
 using JobTrail.Api.Exceptions;
 using JobTrail.Api.Extensions;
@@ -18,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options => options
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ApplicationService>();
 builder.Services.AddScoped<DemoSeedService>();
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -28,7 +31,9 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
     .AllowAnyHeader()
     .AllowAnyMethod()));
 
-builder.Services.AddControllers();
+// Enums travel as text ("saved", "applied"), never as numbers.
+builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters
+    .Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false)));
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.AddSwaggerDocs();

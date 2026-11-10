@@ -32,14 +32,14 @@ erDiagram
         varchar title
         varchar company
         varchar location
-        text url
-        text description "copy of the job post"
+        varchar url "max 2048"
+        varchar description "copy of the job post, max 100000"
         varchar salary_range
         varchar contact_name
         varchar contact_email
         varchar resume_version
-        text notes
-        varchar stage "saved, applied, interview, offer, rejected"
+        varchar notes "max 10000"
+        varchar stage "Saved, Applied, Interview, Offer, Rejected"
         date applied_on
         timestamptz created_at
         timestamptz updated_at
@@ -67,14 +67,14 @@ erDiagram
 
 ## Tables
 
-| Table                       | Purpose                                                                                                                                                    | Sprint | Status                     |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------------------------- |
-| `users`                     | Accounts. The email is stored in lower case and is unique. Passwords are stored only as a salted hash.                                                     | 1      | Migration `InitialAuth`    |
-| `revoked_tokens`            | JWTs that were logged out before they expired. Every authenticated request checks this table. Expired rows are deleted on logout.                          | 1      | Migration `InitialAuth`    |
-| `applications`              | One job application. The job description is copied here so it is kept even if the post is taken down. `stage` is the current column on the board.          | 2      | Planned                    |
-| `application_stage_changes` | One row each time an application changes stage (including the first one), used by the history view and the statistics (response rate, time in each stage). | 2      | Planned                    |
-| `reminders`                 | Follow-up dates for an application. Due reminders show on the extension badge and as browser notifications.                                                | 4      | Planned (enhancement)      |
-| `user_skills`               | The user's skills, compared with the words in job descriptions for Skills Matching.                                                                        | 3      | Planned (API), 4 (screens) |
+| Table                       | Purpose                                                                                                                                                    | Sprint | Status                      |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | --------------------------- |
+| `users`                     | Accounts. The email is stored in lower case and is unique. Passwords are stored only as a salted hash.                                                     | 1      | Migration `InitialAuth`     |
+| `revoked_tokens`            | JWTs that were logged out before they expired. Every authenticated request checks this table. Expired rows are deleted on logout.                          | 1      | Migration `InitialAuth`     |
+| `applications`              | One job application. The job description is copied here so it is kept even if the post is taken down. `stage` is the current column on the board.          | 2      | Migration `AddApplications` |
+| `application_stage_changes` | One row each time an application changes stage (including the first one), used by the history view and the statistics (response rate, time in each stage). | 2      | Migration `AddApplications` |
+| `reminders`                 | Follow-up dates for an application. Due reminders show on the extension badge and as browser notifications.                                                | 4      | Planned (enhancement)       |
+| `user_skills`               | The user's skills, compared with the words in job descriptions for Skills Matching.                                                                        | 3      | Planned (API), 4 (screens)  |
 
 ## Rules
 

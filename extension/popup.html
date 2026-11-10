@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>JobTrail</title>
+    <link rel="stylesheet" href="./src/popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <span class="brand">JobTrail</span>
+      <span id="user-name" class="user" hidden></span>
+      <button id="logout-button" class="link-button" type="button" hidden>Log out</button>
+    </header>
+
+    <main>
+      <p id="loading" class="muted">Loading...</p>
+
+      <!-- Shown when there is no session. -->
+      <form id="login-view" class="stack" hidden>
+        <h1>Sign in</h1>
+        <label>
+          Email
+          <input id="email" type="email" autocomplete="username" required />
+        </label>
+        <label>
+          Password
+          <input id="password" type="password" autocomplete="current-password" required />
+        </label>
+        <button id="login-button" type="submit">Sign in</button>
+        <p id="login-error" class="error" role="alert" hidden></p>
+      </form>
+
+      <!-- Shown when signed in: what was found on the page and the Save button. -->
+      <section id="job-view" class="stack" hidden>
+        <p id="job-message" class="muted"></p>
+
+        <div id="job-preview" class="stack" hidden>
+          <h1 id="job-title"></h1>
+          <dl class="fields">
+            <dt>Company</dt>
+            <dd id="job-company"></dd>
+            <dt>Location</dt>
+            <dd id="job-location"></dd>
+            <dt>Salary</dt>
+            <dd id="job-salary"></dd>
+            <dt>Link</dt>
+            <dd id="job-url" class="url"></dd>
+          </dl>
+          <p id="job-description" class="description"></p>
+          <button id="save-button" type="button">Save to board</button>
+        </div>
+
+        <p id="job-error" class="error" role="alert" hidden></p>
+        <a id="board-link" class="board-link" target="_blank" rel="noreferrer" hidden
+          >Open my board</a
+        >
+      </section>
+    </main>
+
+    <script type="module" src="./src/popup.ts"></script>
+  </body>
+</html>

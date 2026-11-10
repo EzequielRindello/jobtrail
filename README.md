@@ -40,7 +40,7 @@ jobtrail/
 │   ├── JobTrail.Api/        controllers, services, EF Core models and migrations
 │   └── JobTrail.Api.Tests/  xUnit tests
 ├── web/                   React web app
-├── extension/             Browser extension (Sprint 2)
+├── extension/             Browser extension (Chrome and Edge)
 ├── docs/                  Database design and other docs
 └── docker-compose.yml     Local PostgreSQL
 ```
@@ -92,6 +92,25 @@ npm run dev
 
 The web app runs on **http://localhost:5173** (the API accepts requests from this origin).
 
+### 4. Browser extension
+
+From `extension/`:
+
+```bash
+npm install
+npm run build
+```
+
+Then load it in the browser:
+
+1. Open `chrome://extensions` (Chrome) or `edge://extensions` (Edge) and turn on **Developer mode**.
+2. Click **Load unpacked** and choose the `extension/dist` folder.
+3. Pin JobTrail to the toolbar, open a job post and click the JobTrail button. Sign in with your account (or the demo user) and click **Save to board**.
+
+After changing the code, run `npm run build` again and click the reload button of JobTrail in `chrome://extensions`. `npm run watch` rebuilds on every save. Tests: `npm test`.
+
+The extension reads the job from the [schema.org JobPosting](https://schema.org/JobPosting) data that many job sites publish for search engines. Pages without it show "This page has no job data". It talks to the API at `http://localhost:5080`; to point it somewhere else, build with `VITE_API_URL` (and `VITE_WEB_URL` for the board link) and add that URL to `host_permissions` in `extension/public/manifest.json`.
+
 ### Environment variables (deployment)
 
 Locally everything above is enough. On a server, set these instead of user-secrets:
@@ -104,7 +123,9 @@ Locally everything above is enough. On a server, set these instead of user-secre
 
 ## API
 
-All endpoints are documented in Swagger. Sprint 1 covers accounts:
+All endpoints are documented in Swagger.
+
+**Accounts**
 
 | Endpoint                  | Token | Body                               | Result                                                  |
 | ------------------------- | ----- | ---------------------------------- | ------------------------------------------------------- |
@@ -112,6 +133,21 @@ All endpoints are documented in Swagger. Sprint 1 covers accounts:
 | `POST /api/auth/login`    | no    | `{ email, password }`              | `200` with `{ token, expiresAt, user }`, `401` if wrong |
 | `POST /api/auth/logout`   | yes   |                                    | `204`. That token stops working; other devices stay in  |
 | `GET /api/auth/me`        | yes   |                                    | `200` with `{ id, email, displayName }`, `401` if not   |
+
+**Applications** (all need the token; each user only sees and changes their own, any other id gives `404`)
+
+| Endpoint                           | Body                                     | Result                                                    |
+| ---------------------------------- | ---------------------------------------- | --------------------------------------------------------- |
+| `GET /api/applications`            |                                          | `200` with the list for the board, newest first           |
+| `GET /api/applications/{id}`       |                                          | `200` with every field and `history` (its stage changes)  |
+| `POST /api/applications`           | `{ title, company, ...details, stage? }` | `200` with the new application; `stage` defaults to saved |
+| `PUT /api/applications/{id}`       | `{ title, company, ...details }`         | `200`. Replaces the details; the stage does not change    |
+| `PUT /api/applications/{id}/stage` | `{ stage }`                              | `200`. Adds a row to `history` if the stage is new        |
+| `DELETE /api/applications/{id}`    |                                          | `204`, together with its history                          |
+
+- **Details:** `location`, `url`, `description`, `salaryRange`, `contactName`, `contactEmail`, `resumeVersion`, `notes` and `appliedOn` (`YYYY-MM-DD`). `title` and `company` are required.
+- **Stages:** `saved`, `applied`, `interview`, `offer` and `rejected`. Moving an application to `applied` fills `appliedOn` with today if it is empty.
+- **Filters:** `GET /api/applications` takes these, all optional: `search` (company or job title, any case), `stage`, `from` and `to` (`YYYY-MM-DD`, both days included), and `dateField` (`saved`, the default, or `applied`) to choose which date `from`/`to` filter by. Days are UTC days.
 
 Send the token on every protected request as `Authorization: Bearer <token>`. Tokens last 7 days. Errors use the standard [ProblemDetails](https://www.rfc-editor.org/rfc/rfc9457) JSON format, and validation errors (`400`) list the problem for each field under `errors`.
 

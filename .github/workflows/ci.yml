@@ -53,12 +53,13 @@ jobs:
           npm run build
 
       # ---------- Browser extension ----------
-      - name: Build browser extension
+      - name: Build and test browser extension
         if: hashFiles('extension/package.json') != ''
         working-directory: extension
         run: |
           npm ci
           npm run build
+          npm test
 
       # ---------- API ----------
       - name: Set up .NET
