@@ -27,6 +27,12 @@
   box-sizing: border-box;
 }
 
+/* The popup switches screens with the hidden attribute. Classes like .stack set display,
+   which would otherwise win over hidden and keep every screen visible at once. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   width: 340px;
   margin: 0;
