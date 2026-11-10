@@ -1,5 +1,4 @@
 const API_URL = import.meta.env.VITE_API_BASE_URL || '';
-console.log('API URL:', API_URL);
 
 export async function apiRequest<T = unknown>(endpoint: string, data?: object): Promise<T> {
   const token = localStorage.getItem('token');
