@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../api/authApi';
 import '../styles/AuthPages.css';
+import { validateEmail, validatePassword } from '../utils/authValidation';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -17,6 +18,16 @@ export default function RegisterPage() {
     const password = String(form.get('password'));
     const confirmPassword = String(form.get('confirmPassword'));
 
+    if (!validateEmail(email)) {
+      setError('Enter a valid email.');
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setError('The password must have at least 8 characters.');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
@@ -26,8 +37,8 @@ export default function RegisterPage() {
       const result = await register({ displayName, email, password });
       localStorage.setItem('token', result.token);
       navigate('/dashboard');
-    } catch {
-      setError('Registration failed. Please check your information.');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Something went wrong');
     }
   }
 
@@ -46,6 +57,7 @@ export default function RegisterPage() {
               type="text"
               placeholder="Enter your name"
               autoComplete="name"
+              maxLength={100}
               required
             />
 

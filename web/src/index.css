@@ -10,6 +10,14 @@
   --social-bg: rgba(244, 243, 236, 0.5);
   --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
+  --jt-primary: #67349e;
+  --jt-primary-hover: #542683;
+  --jt-heading: #1b1532;
+  --jt-text: #211b35;
+  --jt-muted: #696b80;
+  --jt-border: #ccc9db;
+  --jt-error: #b42342;
+
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;

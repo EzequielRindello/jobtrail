@@ -18,7 +18,9 @@ export async function apiRequest<T = unknown>(endpoint: string, data?: object): 
   });
 
   if (!response.ok) {
-    throw new Error('Something went wrong');
+    const error = await response.json();
+    const message = Object.values(error.errors || {}).flat()[0] as string | undefined;
+    throw new Error(message || error.title || 'Something went wrong');
   }
 
   if (response.status === 204) {

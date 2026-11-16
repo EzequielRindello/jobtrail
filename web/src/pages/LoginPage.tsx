@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../api/authApi';
 import '../styles/AuthPages.css';
+import { validateEmail } from '../utils/authValidation';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -15,12 +16,17 @@ export default function LoginPage() {
     const email = String(form.get('email'));
     const password = String(form.get('password'));
 
+    if (!validateEmail(email)) {
+      setError('Enter a valid email');
+      return;
+    }
+
     try {
       const result = await login({ email, password });
       localStorage.setItem('token', result.token);
       navigate('/dashboard');
-    } catch {
-      setError('Invalid email or password.');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Something went wrong');
     }
   }
 

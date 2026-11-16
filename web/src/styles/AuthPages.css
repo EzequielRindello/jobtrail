@@ -2,7 +2,7 @@
   min-height: calc(100vh - 120px);
   display: flex;
   align-items: center;
-  background: #ffffff;
+  background: var(--bg);
 }
 
 .auth-container {
@@ -23,7 +23,7 @@
 
 .auth-eyebrow {
   margin: 0;
-  color: #6937a4;
+  color: var(--jt-primary);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 3px;
@@ -31,7 +31,7 @@
 
 .auth-content h1 {
   margin: 0 0 15px;
-  color: #1b1532;
+  color: var(--jt-heading);
   font-size: clamp(30px, 2.6vw, 38px);
   font-weight: 700;
   line-height: 1.2;
@@ -48,7 +48,7 @@
 }
 
 .auth-form label {
-  color: #211b35;
+  color: var(--jt-text);
   font-size: 15px;
   font-weight: 600;
   margin-top: 3px;
@@ -59,27 +59,27 @@
   box-sizing: border-box;
   height: 45px;
   padding: 0 16px;
-  border: 1px solid #ccc9db;
+  border: 1px solid var(--jt-border);
   border-radius: 8px;
-  background: #ffffff;
-  color: #211b35;
+  background: var(--bg);
+  color: var(--jt-text);
   font-size: 15px;
   font-family: inherit;
 }
 
 .auth-form input::placeholder {
-  color: #9291a3;
+  color: var(--jt-muted);
 }
 
 .auth-form input:focus {
   outline: none;
-  border-color: #7440aa;
+  border-color: var(--jt-primary);
   box-shadow: 0 0 0 3px rgba(116, 64, 170, 0.1);
 }
 
 .auth-form input:-webkit-autofill {
-  -webkit-text-fill-color: #211b35;
-  box-shadow: 0 0 0 1000px #ffffff inset;
+  -webkit-text-fill-color: var(--jt-text);
+  box-shadow: 0 0 0 1000px var(--bg) inset;
 }
 
 .auth-form button {
@@ -88,8 +88,8 @@
   margin-top: 16px;
   border: none;
   border-radius: 8px;
-  background: #67349e;
-  color: #ffffff;
+  background: var(--jt-primary);
+  color: var(--bg);
   font-size: 16px;
   font-weight: 600;
   font-family: inherit;
@@ -98,7 +98,7 @@
 }
 
 .auth-form button:hover {
-  background: #542683;
+  background: var(--jt-primary-hover);
 }
 
 .auth-form button:focus-visible {
@@ -108,19 +108,19 @@
 
 .auth-form .auth-error {
   margin: 4px 0 0;
-  color: #b42342;
+  color: var(--jt-error);
   font-size: 13px;
   font-weight: 500;
 }
 
 .auth-form .auth-switch {
   margin: 12px 0 0;
-  color: #696b80;
+  color: var(--jt-muted);
   font-size: 15px;
 }
 
 .auth-switch a {
-  color: #67349e;
+  color: var(--jt-primary);
   font-weight: 600;
   text-decoration: underline;
 }
