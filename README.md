@@ -83,14 +83,20 @@ Tests: `dotnet test` from `api/` (they use an in-memory database, so PostgreSQL 
 
 ### 3. Web app
 
-From `web/`:
+From `web/`, tell the web app where the API is by creating the file `web/.env.local` (it is not committed) with this line:
+
+```
+VITE_API_BASE_URL=http://localhost:5080
+```
+
+Then:
 
 ```bash
 npm install
 npm run dev
 ```
 
-The web app runs on **http://localhost:5173** (the API accepts requests from this origin).
+Without that variable the web app calls its own address and cannot reach the API. It runs on **http://localhost:5173** (the API accepts requests from this origin). Sign in with your account or the demo user.
 
 ### 4. Browser extension
 
@@ -109,7 +115,7 @@ Then load it in the browser:
 
 After changing the code, run `npm run build` again and click the reload button of JobTrail in `chrome://extensions`. `npm run watch` rebuilds on every save. Tests: `npm test`.
 
-The extension reads the job from the [schema.org JobPosting](https://schema.org/JobPosting) data that many job sites publish for search engines. Pages without it show "This page has no job data". It talks to the API at `http://localhost:5080`; to point it somewhere else, build with `VITE_API_URL` (and `VITE_WEB_URL` for the board link) and add that URL to `host_permissions` in `extension/public/manifest.json`.
+The extension reads the job from the [schema.org JobPosting](https://schema.org/JobPosting) data that many job sites publish for search engines. The popup shows what it found in a form, so you can fix any field before saving. On pages without it, the popup says so and offers **Enter it manually**. It talks to the API at `http://localhost:5080`; to point it somewhere else, build with `VITE_API_URL` (and `VITE_WEB_URL` for the board link) and add that URL to `host_permissions` in `extension/public/manifest.json`.
 
 ### Environment variables (deployment)
 
@@ -120,6 +126,8 @@ Locally everything above is enough. On a server, set these instead of user-secre
 | `ConnectionStrings__Default` | `Host=...;Database=...;Username=...;Password=...`            |
 | `Jwt__Key`                   | random string, at least 32 characters                        |
 | `Cors__AllowedOrigins__0`    | URL of the deployed web app, e.g. `https://jobtrail.example` |
+
+The web app also needs `VITE_API_BASE_URL` (the URL of the deployed API) when it is built, because Vite writes it into the files at build time.
 
 ## API
 
