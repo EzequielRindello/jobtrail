@@ -148,6 +148,16 @@ All endpoints are documented in Swagger.
 
 - **Details:** `location`, `url`, `description`, `salaryRange`, `contactName`, `contactEmail`, `resumeVersion`, `notes` and `appliedOn` (`YYYY-MM-DD`). `title` and `company` are required.
 - **Stages:** `saved`, `applied`, `interview`, `offer` and `rejected`. Moving an application to `applied` fills `appliedOn` with today if it is empty.
+  **Skills** (all need the token; each user only sees and changes their own, any other id gives `404`)
+
+| Endpoint                  | Body       | Result                                                     |
+| ------------------------- | ---------- | ---------------------------------------------------------- |
+| `GET /api/skills`         |            | `200` with the user's skills, sorted by name               |
+| `POST /api/skills`        | `{ name }` | `200` with the new skill; `409` if the user already has it |
+| `DELETE /api/skills/{id}` |            | `204`                                                      |
+
+A skill name is up to 50 characters, and two names that differ only in upper or lower case count as the same skill.
+
 - **Filters:** `GET /api/applications` takes these, all optional: `search` (company or job title, any case), `stage`, `from` and `to` (`YYYY-MM-DD`, both days included), and `dateField` (`saved`, the default, or `applied`) to choose which date `from`/`to` filter by. Days are UTC days.
 
 Send the token on every protected request as `Authorization: Bearer <token>`. Tokens last 7 days. Errors use the standard [ProblemDetails](https://www.rfc-editor.org/rfc/rfc9457) JSON format, and validation errors (`400`) list the problem for each field under `errors`.
