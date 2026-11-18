@@ -139,6 +139,7 @@ All endpoints are documented in Swagger.
 | Endpoint                           | Body                                     | Result                                                    |
 | ---------------------------------- | ---------------------------------------- | --------------------------------------------------------- |
 | `GET /api/applications`            |                                          | `200` with the list for the board, newest first           |
+| `GET /api/applications/export`     |                                          | `200` CSV file (same filters as the list, see below)      |
 | `GET /api/applications/{id}`       |                                          | `200` with every field and `history` (its stage changes)  |
 | `POST /api/applications`           | `{ title, company, ...details, stage? }` | `200` with the new application; `stage` defaults to saved |
 | `PUT /api/applications/{id}`       | `{ title, company, ...details }`         | `200`. Replaces the details; the stage does not change    |
