@@ -4,6 +4,7 @@ import type { ApplicationFilterValues } from '../api/applicationTypes';
 import AddApplicationForm from './AddApplicationForm';
 import ApplicationFilters from './ApplicationFilters';
 import ExportCsvButton from './ExportCsvButton';
+import Modal from './Modal';
 
 import '../styles/Applications.css';
 
@@ -88,7 +89,11 @@ export default function ApplicationToolbar({
         )}
       </div>
 
-      {adding && <AddApplicationForm onCreated={handleCreated} onCancel={() => setAdding(false)} />}
+      {adding && (
+        <Modal title="Add application" onClose={() => setAdding(false)}>
+          <AddApplicationForm onCreated={handleCreated} onCancel={() => setAdding(false)} />
+        </Modal>
+      )}
 
       <ApplicationFilters onChange={handleFiltersChange} />
 

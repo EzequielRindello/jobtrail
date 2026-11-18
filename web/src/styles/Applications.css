@@ -75,6 +75,58 @@
   border-radius: 12px;
 }
 
+.applications-modal {
+  /* At the top of the page instead of the browser's default, the center. */
+  margin: 24px auto auto;
+  width: min(760px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  background: var(--bg);
+  overflow: auto;
+}
+
+.applications-modal::backdrop {
+  background: rgba(27, 21, 50, 0.55);
+}
+
+.applications-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--jt-muted);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.applications-modal-close:hover {
+  background: #f5f6f8;
+  color: var(--jt-text);
+}
+
+.applications-modal-close:focus-visible {
+  outline: 3px solid #bca4e0;
+  outline-offset: 2px;
+}
+
+/* Leaves room for the X button next to the title. */
+.applications-modal .applications-form h2 {
+  padding-right: 40px;
+}
+
+/* Inside the modal the window is the box, so the form needs no box of its own. */
+.applications-modal .applications-form {
+  max-width: none;
+  border: none;
+}
+
 .applications-form h2 {
   margin: 0;
   color: var(--jt-heading);
