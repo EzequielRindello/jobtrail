@@ -1,0 +1,120 @@
+.skills-page {
+  max-width: 640px;
+}
+
+.skills-intro,
+.skills-muted {
+  margin: 0 0 16px;
+  color: var(--jt-muted);
+  font-size: 15px;
+}
+
+.skills-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.skills-form label {
+  color: var(--jt-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.skills-form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.skills-form-row input {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--jt-border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--jt-text);
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.skills-form-row input:focus {
+  outline: none;
+  border-color: var(--jt-primary);
+  box-shadow: 0 0 0 3px rgba(116, 64, 170, 0.1);
+}
+
+.skills-form-row button {
+  height: 42px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 8px;
+  background: var(--jt-primary);
+  color: var(--bg);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.skills-form-row button:hover:not(:disabled) {
+  background: var(--jt-primary-hover);
+}
+
+.skills-form-row button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.skills-error {
+  margin: 0 0 16px;
+  color: var(--jt-error);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skills-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--jt-border);
+  border-radius: 8px;
+  color: var(--jt-text);
+  overflow-wrap: anywhere;
+}
+
+.skills-list button {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--jt-error);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.skills-list button:hover {
+  text-decoration: underline;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .skills-form-row {
+    flex-direction: column;
+  }
+}
