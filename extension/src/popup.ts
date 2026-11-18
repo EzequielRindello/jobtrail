@@ -31,6 +31,7 @@ const loginError = element('login-error');
 
 const jobView = element('job-view');
 const jobMessage = element('job-message');
+const manualButton = element<HTMLButtonElement>('manual-button');
 const jobForm = element<HTMLFormElement>('job-form');
 const saveButton = element<HTMLButtonElement>('save-button');
 const jobError = element('job-error');
@@ -110,14 +111,25 @@ async function showJob(): Promise<void> {
   jobMessage.textContent = 'Reading this page...';
   show(jobMessage, true);
 
+  show(manualButton, false);
+
   const job = await readJobFromActiveTab();
   if (!job) {
+    // The message says why; the user can still type the job in.
+    show(manualButton, true);
     return;
   }
 
   showForm(fromJob(job));
   show(jobMessage, false);
 }
+
+manualButton.addEventListener('click', () => {
+  show(jobMessage, false);
+  show(manualButton, false);
+  showForm(emptyForm());
+  element('job-title').focus();
+});
 
 // ---------- The form to check and edit the job ----------
 

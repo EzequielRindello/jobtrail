@@ -33,6 +33,10 @@
       <!-- Shown when signed in: what was found on the page and the Save button. -->
       <section id="job-view" class="stack" hidden>
         <p id="job-message" class="muted"></p>
+        <!-- Shown when the page has no job data to read: opens the same form, empty. -->
+        <button id="manual-button" class="link-button" type="button" hidden>
+          Enter it manually
+        </button>
 
         <!-- The job found on the page. Every field can be fixed before saving. -->
         <form id="job-form" class="stack" novalidate hidden>
