@@ -15,7 +15,7 @@ export interface ExtractedJob {
 }
 
 // Same limits as the API (ApplicationLimits.cs), so a long field never blocks the save.
-const LIMITS = {
+export const LIMITS = {
   title: 200,
   company: 200,
   location: 200,

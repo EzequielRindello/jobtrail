@@ -88,13 +88,25 @@ label {
   font-weight: 600;
 }
 
-input {
+input,
+textarea {
   padding: 7px 9px;
   font: inherit;
   color: var(--text);
   background: var(--field);
   border: 1px solid var(--border);
   border-radius: 6px;
+}
+
+textarea {
+  resize: vertical;
+  font-weight: 400;
+}
+
+.field-error {
+  color: var(--error);
+  font-size: 13px;
+  font-weight: 400;
 }
 
 button {
@@ -127,34 +139,6 @@ button:disabled {
 .link-button:hover {
   background: none;
   text-decoration: underline;
-}
-
-.fields {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 10px;
-  margin: 0;
-}
-
-.fields dt {
-  color: var(--muted);
-}
-
-.fields dd {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.url {
-  color: var(--muted);
-}
-
-.description {
-  margin: 0;
-  max-height: 96px;
-  overflow: hidden;
-  color: var(--muted);
-  white-space: pre-line;
 }
 
 .muted {
