@@ -1,4 +1,4 @@
-import { apiRequest } from './client';
+import { apiDownload, apiRequest } from './client';
 import type {
   ApplicationFilterValues,
   ApplicationSummary,
@@ -27,6 +27,19 @@ export async function searchApplications(filters: ApplicationFilterValues) {
     undefined,
     'GET',
   );
+}
+
+// Downloads the applications that match the filters as a CSV file.
+export async function exportApplications(filters: ApplicationFilterValues) {
+  const file = await apiDownload(`/api/applications/export${buildQuery(filters)}`);
+
+  // The browser only saves a file through a link, so a temporary one is clicked.
+  const url = URL.createObjectURL(file);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'jobtrail-applications.csv';
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 export async function createApplication(data: CreateApplicationRequest) {

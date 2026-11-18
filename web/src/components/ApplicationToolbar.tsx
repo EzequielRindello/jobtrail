@@ -3,6 +3,7 @@ import { searchApplications } from '../api/applicationsApi';
 import type { ApplicationFilterValues } from '../api/applicationTypes';
 import AddApplicationForm from './AddApplicationForm';
 import ApplicationFilters from './ApplicationFilters';
+import ExportCsvButton from './ExportCsvButton';
 
 import '../styles/Applications.css';
 
@@ -15,7 +16,7 @@ interface ApplicationToolbarProps {
 
 const NO_FILTERS: ApplicationFilterValues = { search: '', stage: '' };
 
-// The actions above the board: add an application, search and filter. It keeps its own
+// The actions above the board: add an application, export, search and filter. It keeps its own
 // state, so the board only has to place it.
 export default function ApplicationToolbar({
   onCreated,
@@ -79,6 +80,7 @@ export default function ApplicationToolbar({
         >
           Add application
         </button>
+        <ExportCsvButton filters={filters} />
         {message && (
           <p className="applications-message" role="status">
             {message}
