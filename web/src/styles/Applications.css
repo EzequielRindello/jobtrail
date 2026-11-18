@@ -136,6 +136,18 @@
   gap: 12px;
 }
 
+.applications-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+}
+
+.applications-search {
+  flex: 1 1 260px;
+  max-width: 420px;
+}
+
 /* Mobile */
 @media (max-width: 700px) {
   .applications-form-grid {

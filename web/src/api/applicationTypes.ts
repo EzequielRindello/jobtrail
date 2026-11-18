@@ -14,6 +14,12 @@ export interface ApplicationSummary {
   updatedAt: string;
 }
 
+// What the search box and the stage filter hold. An empty value means "do not filter".
+export interface ApplicationFilterValues {
+  search: string;
+  stage: ApplicationStage | '';
+}
+
 // Only title and company are required; the other fields are left out when empty.
 export interface CreateApplicationRequest {
   title: string;
