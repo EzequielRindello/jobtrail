@@ -1,0 +1,264 @@
+.kanban-page {
+  width: 100%;
+}
+
+.kanban-toolbar {
+  padding: 24px 24px 12px;
+  border-bottom: 1px solid var(--jt-border);
+}
+
+.kanban-toolbar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.kanban-toolbar h1 {
+  color: var(--jt-heading);
+  font-size: 30px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.kanban-toolbar p {
+  color: var(--jt-muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+.kanban-add-button {
+  background: var(--jt-primary);
+  color: white;
+  border: 1px solid var(--jt-primary);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.kanban-add-button:hover {
+  background: var(--jt-primary-hover);
+}
+
+.kanban-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kanban-toolbar-actions button:not(.kanban-add-button) {
+  background: transparent;
+  border: none;
+  color: var(--jt-muted);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.kanban-toolbar-actions button:hover {
+  color: var(--jt-primary);
+}
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  padding: 20px 24px;
+  align-items: start;
+}
+
+.kanban-column {
+  background: #f7f6fa;
+  border: 1px solid var(--jt-border);
+  border-radius: 10px;
+  padding: 12px;
+  min-height: 320px;
+  min-width: 0;
+}
+
+.kanban-column h2 {
+  color: var(--jt-heading);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 16px;
+}
+
+.kanban-count {
+  color: var(--jt-muted);
+}
+
+.job-card {
+  background: white;
+  border: 1px solid var(--jt-border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 3px 12px rgba(27, 21, 50, 0.05);
+}
+
+.job-card:hover {
+  border-color: var(--jt-primary);
+  box-shadow: 0 3px 12px rgba(27, 21, 50, 0.09);
+}
+
+.job-card-company {
+  color: var(--jt-muted);
+  font-size: 12px;
+  font-weight: 500;
+  margin: 0 0 4px;
+}
+
+.job-card h3 {
+  color: var(--jt-heading);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0 0 8px;
+}
+
+.job-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+
+.job-card-tag {
+  display: inline-block;
+  background: #f7f6fa;
+  border: 1px solid var(--jt-border);
+  border-radius: 8px;
+  padding: 0 7px;
+  color: var(--jt-primary);
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.job-card-date {
+  display: block;
+  color: var(--jt-muted);
+  font-size: 11px;
+}
+
+.kanban-mobile-tabs {
+  display: none;
+}
+
+.kanban-toolbar-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.job-card-move {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .kanban-toolbar {
+    padding: 0px 16px 0px;
+  }
+
+  .kanban-toolbar-top {
+    position: relative;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0px;
+  }
+
+  .kanban-toolbar h1 {
+    font-size: 25px;
+  }
+
+  .kanban-toolbar p {
+    font-size: 12px;
+  }
+
+  .kanban-toolbar-actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 0px;
+    padding-top: 0;
+  }
+
+  .kanban-toolbar-actions button {
+    white-space: nowrap;
+  }
+
+  .kanban-add-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  .kanban-mobile-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 10px 10px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .kanban-mobile-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .kanban-mobile-tabs button {
+    flex-shrink: 0;
+    background: #f7f6fa;
+    border: 1px solid var(--jt-border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    color: var(--jt-text);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .kanban-mobile-tabs button:hover {
+    border-color: var(--jt-primary);
+    color: var(--jt-primary);
+  }
+
+  .kanban-mobile-tabs button.active {
+    background: var(--jt-primary);
+    border-color: var(--jt-primary);
+    color: white;
+  }
+
+  .kanban-board {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kanban-column {
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .job-card-move {
+    display: flex;
+    align-items: center;
+    gap: 0px;
+    margin: 8px 0 0 auto;
+    padding: 4px 0;
+    background: transparent;
+    border: none;
+    color: var(--jt-text);
+    font-size: 12px;
+    cursor: pointer;
+  }
+}

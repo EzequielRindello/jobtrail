@@ -1,6 +1,10 @@
 const API_URL = import.meta.env.VITE_API_BASE_URL || '';
 
-export async function apiRequest<T = unknown>(endpoint: string, data?: object): Promise<T> {
+export async function apiRequest<T = unknown>(
+  endpoint: string,
+  data?: object,
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'POST',
+): Promise<T> {
   const token = localStorage.getItem('token');
 
   const headers: Record<string, string> = {
@@ -12,7 +16,7 @@ export async function apiRequest<T = unknown>(endpoint: string, data?: object): 
   }
 
   const response = await fetch(API_URL + endpoint, {
-    method: 'POST',
+    method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
   });
