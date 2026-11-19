@@ -1,10 +1,18 @@
 // The popup that opens from the toolbar button. Two screens:
 // 1. Sign in, when there is no saved session.
-// 2. The job found on the current tab, with a button to save it to the board.
+// 2. The job found on the current tab, in a form to check and fix before saving it.
 
 import { ApiError, createApplication, login, logout } from './api';
 import { WEB_URL } from './config';
 import { extractJob, type ExtractedJob } from './extractJob';
+import {
+  emptyForm,
+  fromJob,
+  toJob,
+  validateJobForm,
+  type JobFormErrors,
+  type JobFormValues,
+} from './jobForm';
 import { clearSession, getSession, saveSession, type Session } from './session';
 
 function element<T extends HTMLElement>(id: string): T {
@@ -23,13 +31,16 @@ const loginError = element('login-error');
 
 const jobView = element('job-view');
 const jobMessage = element('job-message');
-const jobPreview = element('job-preview');
+const manualButton = element<HTMLButtonElement>('manual-button');
+const jobForm = element<HTMLFormElement>('job-form');
 const saveButton = element<HTMLButtonElement>('save-button');
 const jobError = element('job-error');
 const boardLink = element<HTMLAnchorElement>('board-link');
 
+// Each form field has an input "job-<name>" and an error line "job-<name>-error".
+const FORM_FIELDS = Object.keys(emptyForm()) as (keyof JobFormValues)[];
+
 let session: Session | null = null;
-let job: ExtractedJob | null = null;
 
 function show(target: HTMLElement, visible: boolean): void {
   target.hidden = !visible;
@@ -94,31 +105,54 @@ async function showJob(): Promise<void> {
   show(userName, true);
   show(logoutButton, true);
   show(jobView, true);
-  show(jobPreview, false);
+  show(jobForm, false);
   show(boardLink, false);
   showError(jobError, null);
   jobMessage.textContent = 'Reading this page...';
   show(jobMessage, true);
 
-  job = await readJobFromActiveTab();
+  show(manualButton, false);
+
+  const job = await readJobFromActiveTab();
   if (!job) {
+    // The message says why; the user can still type the job in.
+    show(manualButton, true);
     return;
   }
 
-  element('job-title').textContent = job.title || '(no title)';
-  element('job-company').textContent = job.company || '(no company)';
-  element('job-location').textContent = job.location ?? '-';
-  element('job-salary').textContent = job.salaryRange ?? '-';
-  element('job-url').textContent = job.url ? new URL(job.url).hostname : '-';
-  element('job-description').textContent = job.description ?? '';
+  showForm(fromJob(job));
   show(jobMessage, false);
-  show(jobPreview, true);
+}
 
-  // The API needs both. Editing the fields before saving comes in a later version.
-  const canSave = job.title !== '' && job.company !== '';
-  saveButton.disabled = !canSave;
-  if (!canSave) {
-    showError(jobError, "This page's job data has no title or company, so it can't be saved yet.");
+manualButton.addEventListener('click', () => {
+  show(jobMessage, false);
+  show(manualButton, false);
+  showForm(emptyForm());
+  element('job-title').focus();
+});
+
+// ---------- The form to check and edit the job ----------
+
+function showForm(values: JobFormValues): void {
+  for (const field of FORM_FIELDS) {
+    element<HTMLInputElement | HTMLTextAreaElement>(`job-${field}`).value = values[field];
+  }
+  showFieldErrors({});
+  saveButton.disabled = false;
+  show(jobForm, true);
+}
+
+function readForm(): JobFormValues {
+  const values = emptyForm();
+  for (const field of FORM_FIELDS) {
+    values[field] = element<HTMLInputElement | HTMLTextAreaElement>(`job-${field}`).value;
+  }
+  return values;
+}
+
+function showFieldErrors(errors: JobFormErrors): void {
+  for (const field of FORM_FIELDS) {
+    showError(element(`job-${field}-error`), errors[field] ?? null);
   }
 }
 
@@ -156,17 +190,25 @@ async function readJobFromActiveTab(): Promise<ExtractedJob | null> {
   return found;
 }
 
-saveButton.addEventListener('click', async () => {
-  if (!session || !job) {
+jobForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!session) {
     return;
   }
 
-  saveButton.disabled = true;
   showError(jobError, null);
+  const errors = validateJobForm(readForm());
+  showFieldErrors(errors);
+  if (Object.keys(errors).length > 0) {
+    return;
+  }
+
+  const job: ExtractedJob = toJob(readForm());
+  saveButton.disabled = true;
 
   try {
     await createApplication(job, session.token);
-    show(jobPreview, false);
+    show(jobForm, false);
     jobMessage.textContent = `Saved "${job.title}" to your board.`;
     show(jobMessage, true);
     boardLink.href = `${WEB_URL}/dashboard`;
@@ -180,7 +222,16 @@ saveButton.addEventListener('click', async () => {
       return;
     }
 
-    showError(jobError, error instanceof ApiError ? error.message : 'Something went wrong.');
+    if (error instanceof ApiError && Object.keys(error.fieldErrors).length > 0) {
+      // The API names its fields like the form does (title, company, url, ...).
+      const apiErrors: JobFormErrors = {};
+      for (const field of FORM_FIELDS) {
+        apiErrors[field] = error.fieldErrors[field]?.[0];
+      }
+      showFieldErrors(apiErrors);
+    } else {
+      showError(jobError, error instanceof ApiError ? error.message : 'Something went wrong.');
+    }
     saveButton.disabled = false;
   }
 });

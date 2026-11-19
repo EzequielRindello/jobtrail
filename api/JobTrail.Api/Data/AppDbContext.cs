@@ -1,4 +1,5 @@
 using JobTrail.Api.Models;
+using JobTrail.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace JobTrail.Api.Data;
@@ -12,6 +13,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Application> Applications => Set<Application>();
 
     public DbSet<ApplicationStageChange> ApplicationStageChanges => Set<ApplicationStageChange>();
+
+    public DbSet<UserSkill> UserSkills => Set<UserSkill>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,6 +52,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             // The board lists one user's applications, newest first.
             application.HasIndex(a => new { a.UserId, a.CreatedAt });
             application.HasMany(a => a.StageChanges).WithOne().HasForeignKey(c => c.ApplicationId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<UserSkill>(skill =>
+        {
+            skill.Property(s => s.Name).HasMaxLength(SkillService.MaxNameLength);
+            skill.HasOne<User>().WithMany().HasForeignKey(s => s.UserId).OnDelete(DeleteBehavior.Cascade);
+            // A user cannot have the same skill twice (the service also checks it ignoring case).
+            skill.HasIndex(s => new { s.UserId, s.Name }).IsUnique();
         });
 
         modelBuilder.Entity<ApplicationStageChange>(change =>

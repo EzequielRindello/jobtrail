@@ -1,0 +1,204 @@
+/* Shared filter bar, search box and dropdowns (issue #49). Every list page uses these. They are
+   a compact size (32px high, 13px text) so the filters do not compete with the content. */
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.filter-control {
+  height: 32px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1px solid var(--jt-border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--jt-text);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.filter-control:focus {
+  outline: none;
+  border-color: var(--jt-primary);
+  box-shadow: 0 0 0 3px rgba(116, 64, 170, 0.1);
+}
+
+/* Same chevron as the selects in the forms (Applications.css), a bit smaller. */
+select.filter-control {
+  appearance: none;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23696b80' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 11px;
+  cursor: pointer;
+}
+
+.filter-search {
+  position: relative;
+  flex: 0 1 260px;
+  min-width: 160px;
+}
+
+.filter-search .filter-control {
+  width: 100%;
+  padding-left: 30px;
+}
+
+.filter-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  color: var(--jt-muted);
+  pointer-events: none;
+}
+
+.filter-clear {
+  height: 32px;
+  padding: 0 4px;
+  border: none;
+  background: none;
+  color: var(--jt-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.filter-clear:hover {
+  text-decoration: underline;
+}
+
+/* Dropdown: a button with a floating menu under it. */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--jt-border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--jt-text);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dropdown-toggle:hover,
+.dropdown-toggle[aria-expanded='true'] {
+  border-color: var(--jt-primary);
+  color: var(--jt-primary);
+}
+
+.dropdown-toggle:focus-visible,
+.filter-clear:focus-visible,
+.dropdown-option:focus-visible {
+  outline: 3px solid #bca4e0;
+  outline-offset: 2px;
+}
+
+.dropdown-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background: var(--jt-primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 200px;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid var(--jt-border);
+  border-radius: 8px;
+  background: var(--bg);
+  box-shadow: 0 8px 24px rgba(27, 21, 50, 0.12);
+}
+
+.dropdown-menu-right {
+  left: auto;
+  right: 0;
+}
+
+/* Inside a menu the controls take the menu's width. */
+.dropdown-menu .filter-control {
+  width: 100%;
+}
+
+.dropdown-options {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: -6px;
+}
+
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--jt-text);
+  font-size: 13px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown-option:hover {
+  background: #f7f6fa;
+}
+
+.dropdown-option[aria-checked='true'] {
+  color: var(--jt-primary);
+  font-weight: 600;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-field label {
+  color: var(--jt-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Mobile: the search takes a whole line. */
+@media (max-width: 600px) {
+  .filter-search {
+    flex: 1 1 100%;
+  }
+}

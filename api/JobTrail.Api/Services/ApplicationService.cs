@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Net.Mail;
+using System.Text;
 using JobTrail.Api.Contracts.Applications;
 using JobTrail.Api.Data;
 using JobTrail.Api.Exceptions;
@@ -9,6 +11,16 @@ namespace JobTrail.Api.Services;
 
 public class ApplicationService
 {
+    #region Consts
+
+    private static readonly string[] CsvColumns =
+    [
+        "Title", "Company", "Location", "Url", "Stage", "Applied on", "Saved on",
+        "Salary range", "Contact name", "Contact email", "Resume version", "Notes",
+    ];
+
+    #endregion
+
     #region Constructor
 
     private readonly AppDbContext _db;
@@ -26,22 +38,7 @@ public class ApplicationService
 
     public async Task<List<ApplicationSummaryResponse>> SearchAsync(Guid userId, SearchApplicationsRequest rq, CancellationToken cancellationToken)
     {
-        var query = _db.Applications.Where(a => a.UserId == userId);
-
-        if (!string.IsNullOrWhiteSpace(rq.Search))
-        {
-            var term = rq.Search.Trim().ToLowerInvariant();
-            query = query.Where(a => a.Title.ToLower().Contains(term) || a.Company.ToLower().Contains(term));
-        }
-
-        if (rq.Stage is not null)
-        {
-            query = query.Where(a => a.Stage == rq.Stage);
-        }
-
-        query = rq.DateField == SearchApplicationsRequest.DateFieldType.Applied
-            ? FilterByAppliedOn(query, rq.From, rq.To)
-            : FilterByCreatedAt(query, rq.From, rq.To);
+        var query = BuildSearchQuery(userId, rq);
 
         return await query
             .OrderByDescending(a => a.CreatedAt)
@@ -131,6 +128,30 @@ public class ApplicationService
 
     #endregion
 
+    #region Export
+
+    // Same filters as Search, so the file matches what the user sees on screen.
+    public async Task<byte[]> ExportAsync(Guid userId, SearchApplicationsRequest rq, CancellationToken cancellationToken)
+    {
+        var applications = await BuildSearchQuery(userId, rq)
+            .AsNoTracking()
+            .OrderByDescending(a => a.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        var csv = new StringBuilder();
+        csv.Append(string.Join(',', CsvColumns)).Append("\r\n");
+        foreach (var application in applications)
+        {
+            csv.Append(string.Join(',', CreateCsvRow(application).Select(EscapeCsv))).Append("\r\n");
+        }
+
+        // The BOM makes Excel read accents and other non-ASCII characters correctly.
+        var encoding = new UTF8Encoding(true);
+        return [.. encoding.GetPreamble(), .. encoding.GetBytes(csv.ToString())];
+    }
+
+    #endregion
+
     #region Validations
 
     private static void ValidateSave(SaveApplicationRequest rq)
@@ -190,6 +211,65 @@ public class ApplicationService
             .Include(a => a.StageChanges)
             .FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId, cancellationToken)
             ?? throw NotFoundException();
+    }
+
+    private IQueryable<Application> BuildSearchQuery(Guid userId, SearchApplicationsRequest rq)
+    {
+        var query = _db.Applications.Where(a => a.UserId == userId);
+
+        if (!string.IsNullOrWhiteSpace(rq.Search))
+        {
+            var term = rq.Search.Trim().ToLowerInvariant();
+            query = query.Where(a => a.Title.ToLower().Contains(term) || a.Company.ToLower().Contains(term));
+        }
+
+        if (rq.Stage is not null)
+        {
+            query = query.Where(a => a.Stage == rq.Stage);
+        }
+
+        query = rq.DateField == SearchApplicationsRequest.DateFieldType.Applied
+            ? FilterByAppliedOn(query, rq.From, rq.To)
+            : FilterByCreatedAt(query, rq.From, rq.To);
+
+        return query;
+    }
+
+    private static string?[] CreateCsvRow(Application application)
+    {
+        return
+        [
+            application.Title,
+            application.Company,
+            application.Location,
+            application.Url,
+            application.Stage.ToString(),
+            application.AppliedOn?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            application.CreatedAt.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            application.SalaryRange,
+            application.ContactName,
+            application.ContactEmail,
+            application.ResumeVersion,
+            application.Notes,
+        ];
+    }
+
+    private static string EscapeCsv(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return string.Empty;
+        }
+
+        // A cell starting with these is run as a formula by Excel, so it is prefixed with a quote.
+        if ("=+-@\t\r".Contains(value[0]))
+        {
+            value = "'" + value;
+        }
+
+        return value.IndexOfAny([',', '"', '\r', '\n']) >= 0
+            ? "\"" + value.Replace("\"", "\"\"") + "\""
+            : value;
     }
 
     private static IQueryable<Application> FilterByCreatedAt(IQueryable<Application> query, DateOnly? from, DateOnly? to)

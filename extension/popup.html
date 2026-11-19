@@ -33,22 +33,46 @@
       <!-- Shown when signed in: what was found on the page and the Save button. -->
       <section id="job-view" class="stack" hidden>
         <p id="job-message" class="muted"></p>
+        <!-- Shown when the page has no job data to read: opens the same form, empty. -->
+        <button id="manual-button" class="link-button" type="button" hidden>
+          Enter it manually
+        </button>
 
-        <div id="job-preview" class="stack" hidden>
-          <h1 id="job-title"></h1>
-          <dl class="fields">
-            <dt>Company</dt>
-            <dd id="job-company"></dd>
-            <dt>Location</dt>
-            <dd id="job-location"></dd>
-            <dt>Salary</dt>
-            <dd id="job-salary"></dd>
-            <dt>Link</dt>
-            <dd id="job-url" class="url"></dd>
-          </dl>
-          <p id="job-description" class="description"></p>
-          <button id="save-button" type="button">Save to board</button>
-        </div>
+        <!-- The job found on the page. Every field can be fixed before saving. -->
+        <form id="job-form" class="stack" novalidate hidden>
+          <h1>Check the job before saving</h1>
+          <label>
+            Title *
+            <input id="job-title" type="text" autocomplete="off" />
+            <span id="job-title-error" class="field-error" hidden></span>
+          </label>
+          <label>
+            Company *
+            <input id="job-company" type="text" autocomplete="off" />
+            <span id="job-company-error" class="field-error" hidden></span>
+          </label>
+          <label>
+            Location
+            <input id="job-location" type="text" autocomplete="off" />
+            <span id="job-location-error" class="field-error" hidden></span>
+          </label>
+          <label>
+            Salary
+            <input id="job-salaryRange" type="text" autocomplete="off" />
+            <span id="job-salaryRange-error" class="field-error" hidden></span>
+          </label>
+          <label>
+            Link
+            <input id="job-url" type="url" autocomplete="off" />
+            <span id="job-url-error" class="field-error" hidden></span>
+          </label>
+          <label>
+            Description
+            <textarea id="job-description" rows="5"></textarea>
+            <span id="job-description-error" class="field-error" hidden></span>
+          </label>
+          <button id="save-button" type="submit">Save to board</button>
+        </form>
 
         <p id="job-error" class="error" role="alert" hidden></p>
         <a id="board-link" class="board-link" target="_blank" rel="noreferrer" hidden

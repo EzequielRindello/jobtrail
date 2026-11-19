@@ -61,7 +61,7 @@ erDiagram
     user_skills {
         uuid id PK
         uuid user_id FK
-        varchar name "unique per user"
+        varchar name "unique per user, max 50"
     }
 ```
 
@@ -74,7 +74,7 @@ erDiagram
 | `applications`              | One job application. The job description is copied here so it is kept even if the post is taken down. `stage` is the current column on the board.          | 2      | Migration `AddApplications` |
 | `application_stage_changes` | One row each time an application changes stage (including the first one), used by the history view and the statistics (response rate, time in each stage). | 2      | Migration `AddApplications` |
 | `reminders`                 | Follow-up dates for an application. Due reminders show on the extension badge and as browser notifications.                                                | 4      | Planned (enhancement)       |
-| `user_skills`               | The user's skills, compared with the words in job descriptions for Skills Matching.                                                                        | 3      | Planned (API), 4 (screens)  |
+| `user_skills`               | The user's skills, compared with the words in job descriptions for Skills Matching.                                                                        | 3      | Migration `AddUserSkills`   |
 
 ## Rules
 

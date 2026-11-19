@@ -1,3 +1,4 @@
+using System.Text;
 using JobTrail.Api.Contracts.Applications;
 using JobTrail.Api.Data;
 using JobTrail.Api.Exceptions;
@@ -240,6 +241,61 @@ public class ApplicationServiceTests : IDisposable
         await applicationService.DeleteAsync(Me, created.Id, CancellationToken.None);
 
         Assert.Empty(db.Applications);
+    }
+
+    [Fact]
+    public async Task Export_WritesHeaderAndOnlyMyApplicationsNewestFirst()
+    {
+        await CreateAsync(Me, "First", "Alpha Fictional");
+        clock.Advance(TimeSpan.FromMinutes(1));
+        await CreateAsync(Me, "Second", "Beta Fictional", ApplicationStage.Applied);
+        await CreateAsync(SomeoneElse, "Not mine", "Gamma Fictional");
+
+        var lines = ReadCsv(await applicationService.ExportAsync(Me, new SearchApplicationsRequest(), CancellationToken.None));
+
+        Assert.Equal("Title,Company,Location,Url,Stage,Applied on,Saved on,Salary range,Contact name,Contact email,Resume version,Notes", lines[0]);
+        Assert.Equal(3, lines.Length);
+        Assert.Equal("Second,Beta Fictional,,,Applied,2026-11-10,2026-11-10,,,,,", lines[1]);
+        Assert.Equal("First,Alpha Fictional,,,Saved,,2026-11-10,,,,,", lines[2]);
+    }
+
+    [Fact]
+    public async Task Export_AppliesTheSameFiltersAsSearch()
+    {
+        await CreateAsync(Me, "Saved job", "Alpha Fictional");
+        await CreateAsync(Me, "Applied job", "Beta Fictional", ApplicationStage.Applied);
+
+        var lines = ReadCsv(await applicationService.ExportAsync(Me, new SearchApplicationsRequest { Stage = ApplicationStage.Applied }, CancellationToken.None));
+
+        Assert.Equal(2, lines.Length);
+        Assert.StartsWith("Applied job,", lines[1]);
+    }
+
+    [Fact]
+    public async Task Export_QuotesSpecialCharactersAndNeutralizesFormulas()
+    {
+        var rq = new CreateApplicationRequest { Title = "=HYPERLINK(\"x\")", Company = "Smith, Jones & \"Sons\"", Notes = "line one\nline two" };
+        await applicationService.CreateAsync(Me, rq, CancellationToken.None);
+
+        var bytes = await applicationService.ExportAsync(Me, new SearchApplicationsRequest(), CancellationToken.None);
+        var csv = Encoding.UTF8.GetString(bytes).TrimStart('\uFEFF');
+
+        Assert.Contains("\"'=HYPERLINK(\"\"x\"\")\"", csv);
+        Assert.Contains("\"Smith, Jones & \"\"Sons\"\"\"", csv);
+        Assert.Contains("\"line one\nline two\"", csv);
+    }
+
+    [Fact]
+    public async Task Export_StartsWithAUtf8Bom()
+    {
+        var bytes = await applicationService.ExportAsync(Me, new SearchApplicationsRequest(), CancellationToken.None);
+
+        Assert.Equal([0xEF, 0xBB, 0xBF], bytes[..3]);
+    }
+
+    private static string[] ReadCsv(byte[] bytes)
+    {
+        return Encoding.UTF8.GetString(bytes).TrimStart('\uFEFF').TrimEnd().Split("\r\n");
     }
 
     private async Task<ApplicationResponse> CreateAsync(Guid userId, string title, string company, ApplicationStage stage = ApplicationStage.Saved, DateOnly? appliedOn = null)

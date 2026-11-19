@@ -24,7 +24,7 @@ export default function LoginPage() {
     try {
       const result = await login({ email, password });
       localStorage.setItem('token', result.token);
-      navigate('/dashboard');
+      navigate('/kanban');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Something went wrong');
     }

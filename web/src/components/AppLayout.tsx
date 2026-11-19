@@ -31,6 +31,9 @@ export default function AppLayout() {
             <Link to="/kanban" className={location.pathname === '/kanban' ? 'active' : ''}>
               Kanban
             </Link>
+            <Link to="/skills" className={location.pathname === '/skills' ? 'active' : ''}>
+              Skills
+            </Link>
             <Link to="/privacy" className={location.pathname === '/privacy' ? 'active' : ''}>
               Privacy
             </Link>
@@ -51,7 +54,7 @@ export default function AppLayout() {
               Log Out
             </button>
           ) : (
-            <Link to="/login" className="logout-button">
+            <Link to="/login" className="logout-button login-button">
               Log In
             </Link>
           )}
@@ -59,6 +62,7 @@ export default function AppLayout() {
         <nav className="mobile-nav">
           <Link to="/dashboard">Dashboard</Link>
           <Link to="/kanban">Kanban</Link>
+          <Link to="/skills">Skills</Link>
           <Link to="/privacy">Privacy</Link>
         </nav>
       </header>
