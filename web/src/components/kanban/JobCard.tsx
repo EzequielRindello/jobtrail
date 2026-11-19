@@ -23,7 +23,7 @@ export default function JobCard({ title, company, location, appliedOn, stage }: 
 
       <small className="job-card-date">{appliedOn ? `Applied ${appliedOn}` : stage}</small>
       <button type="button" className="job-card-move">
-        Move to <ChevronRight size={13} strokeWidth={2} />
+        Move to <ChevronRight size={14} strokeWidth={2} />
       </button>
     </div>
   );

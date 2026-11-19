@@ -1,80 +1,85 @@
-import { useEffect, useRef, useState } from 'react';
-import { STAGES, type ApplicationFilterValues } from '../api/applicationTypes';
-
-import '../styles/Applications.css';
-
-// How long to wait after the last key before asking the API, so typing does not send a request per letter.
-const SEARCH_DELAY_MS = 300;
+import { ListFilter } from 'lucide-react';
+import { STAGES, type ApplicationFilterValues, type DateField } from '../api/applicationTypes';
+import Dropdown from './filters/Dropdown';
+import SearchField from './filters/SearchField';
 
 interface ApplicationFiltersProps {
-  onChange: (filters: ApplicationFilterValues) => void;
+  values: ApplicationFilterValues;
+  onChange: (changes: Partial<ApplicationFilterValues>) => void;
 }
 
-export default function ApplicationFilters({ onChange }: ApplicationFiltersProps) {
-  const [search, setSearch] = useState('');
-  const [stage, setStage] = useState<ApplicationFilterValues['stage']>('');
-  const timer = useRef<number | undefined>(undefined);
+function capitalize(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
 
-  useEffect(() => {
-    return () => window.clearTimeout(timer.current);
-  }, []);
-
-  function handleSearch(event: React.ChangeEvent<HTMLInputElement>) {
-    const text = event.target.value;
-    setSearch(text);
-
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => onChange({ search: text, stage }), SEARCH_DELAY_MS);
-  }
-
-  function handleStage(event: React.ChangeEvent<HTMLSelectElement>) {
-    const next = event.target.value as ApplicationFilterValues['stage'];
-    setStage(next);
-
-    // A search typed a moment ago would still fire with the old stage.
-    window.clearTimeout(timer.current);
-    onChange({ search, stage: next });
-  }
-
-  function handleClear() {
-    window.clearTimeout(timer.current);
-    setSearch('');
-    setStage('');
-    onChange({ search: '', stage: '' });
-  }
-
-  const hasFilters = search.trim() !== '' || stage !== '';
+// The application filters: search and stage always visible, and the date range inside the
+// Filter dropdown so it does not take space when it is not used.
+export default function ApplicationFilters({ values, onChange }: ApplicationFiltersProps) {
+  const activeDates = (values.from !== '' ? 1 : 0) + (values.to !== '' ? 1 : 0);
 
   return (
-    <div className="applications-filters">
-      <div className="applications-field applications-search">
-        <label htmlFor="filter-search">Search</label>
-        <input
-          id="filter-search"
-          type="search"
-          value={search}
-          onChange={handleSearch}
-          placeholder="Job title or company"
-        />
-      </div>
+    <>
+      <Dropdown label="Filter" icon={<ListFilter size={13} />} badge={activeDates}>
+        <div className="filter-field">
+          <label htmlFor="filter-date-field">Date</label>
+          <select
+            id="filter-date-field"
+            className="filter-control"
+            value={values.dateField}
+            onChange={(event) => onChange({ dateField: event.target.value as DateField })}
+          >
+            <option value="saved">Saved on</option>
+            <option value="applied">Applied on</option>
+          </select>
+        </div>
 
-      <div className="applications-field">
-        <label htmlFor="filter-stage">Stage</label>
-        <select id="filter-stage" value={stage} onChange={handleStage}>
-          <option value="">All stages</option>
-          {STAGES.map((value) => (
-            <option key={value} value={value}>
-              {value.charAt(0).toUpperCase() + value.slice(1)}
-            </option>
-          ))}
-        </select>
-      </div>
+        <div className="filter-field">
+          <label htmlFor="filter-from">From</label>
+          <input
+            id="filter-from"
+            type="date"
+            className="filter-control"
+            value={values.from}
+            max={values.to || undefined}
+            onChange={(event) => onChange({ from: event.target.value })}
+          />
+        </div>
 
-      {hasFilters && (
-        <button type="button" className="applications-secondary" onClick={handleClear}>
-          Clear filters
-        </button>
-      )}
-    </div>
+        <div className="filter-field">
+          <label htmlFor="filter-to">To</label>
+          <input
+            id="filter-to"
+            type="date"
+            className="filter-control"
+            value={values.to}
+            min={values.from || undefined}
+            onChange={(event) => onChange({ to: event.target.value })}
+          />
+        </div>
+      </Dropdown>
+
+      <select
+        className="filter-control"
+        aria-label="Stage"
+        value={values.stage}
+        onChange={(event) =>
+          onChange({ stage: event.target.value as ApplicationFilterValues['stage'] })
+        }
+      >
+        <option value="">All stages</option>
+        {STAGES.map((stage) => (
+          <option key={stage} value={stage}>
+            {capitalize(stage)}
+          </option>
+        ))}
+      </select>
+
+      <SearchField
+        value={values.search}
+        onChange={(search) => onChange({ search })}
+        placeholder="Search job title or company"
+        label="Search applications"
+      />
+    </>
   );
 }

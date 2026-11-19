@@ -1,7 +1,24 @@
 import { useEffect, useState } from 'react';
 import { addSkill, deleteSkill, getSkills, type Skill } from '../api/skillsApi';
+import Modal from '../components/Modal';
+import PageHeader from '../components/PageHeader';
+import FilterBar from '../components/filters/FilterBar';
+import SearchField from '../components/filters/SearchField';
+import SortMenu from '../components/filters/SortMenu';
+import { useUrlFilters } from '../hooks/useUrlFilters';
 
+import '../styles/Applications.css';
 import '../styles/Skills.css';
+
+const SORT_OPTIONS = [
+  { value: 'az', label: 'Name (A to Z)' },
+  { value: 'za', label: 'Name (Z to A)' },
+] as const;
+
+type SortOption = (typeof SORT_OPTIONS)[number]['value'];
+
+// What the skills page keeps in the URL (same idea as the board, issue #49).
+const URL_DEFAULTS = { search: '', sort: 'az' };
 
 // Same limit as the API (SkillService.MaxNameLength).
 const MAX_SKILL_LENGTH = 50;
@@ -17,7 +34,19 @@ export default function SkillsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [name, setName] = useState('');
+  // The Add skill modal: whether it is open, saving, and its own error message.
   const [adding, setAdding] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
+  const url = useUrlFilters(URL_DEFAULTS);
+  const sortBy: SortOption = url.values.sort === 'za' ? 'za' : 'az';
+
+  // The skills list is small and already loaded, so search and sort happen here.
+  const search = url.values.search.trim().toLowerCase();
+  const visible = sortByName(skills.filter((skill) => skill.name.toLowerCase().includes(search)));
+  if (sortBy === 'za') {
+    visible.reverse();
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -46,23 +75,29 @@ export default function SkillsPage() {
 
   async function handleAdd(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError('');
+    setFormError('');
 
     if (name.trim() === '') {
-      setError('Enter the skill.');
+      setFormError('Enter the skill.');
       return;
     }
 
-    setAdding(true);
+    setSaving(true);
     try {
       const skill = await addSkill(name.trim());
       setSkills((current) => sortByName([...current, skill]));
-      setName('');
+      closeModal();
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Something went wrong');
+      setFormError(error instanceof Error ? error.message : 'Something went wrong');
     } finally {
-      setAdding(false);
+      setSaving(false);
     }
+  }
+
+  function closeModal() {
+    setAdding(false);
+    setName('');
+    setFormError('');
   }
 
   async function handleDelete(id: string) {
@@ -77,28 +112,57 @@ export default function SkillsPage() {
 
   return (
     <div className="skills-page">
-      <h1>My skills</h1>
-      <p className="skills-intro">
-        Add the skills you have. JobTrail will compare them with job descriptions in a later
-        version.
-      </p>
-
-      <form className="skills-form" onSubmit={handleAdd}>
-        <label htmlFor="skill-name">New skill</label>
-        <div className="skills-form-row">
-          <input
-            id="skill-name"
-            type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            maxLength={MAX_SKILL_LENGTH}
-            placeholder="For example: React"
-          />
-          <button type="submit" disabled={adding}>
-            {adding ? 'Adding...' : 'Add skill'}
+      <PageHeader
+        title="My skills"
+        subtitle="Add the skills you have. JobTrail will compare them with job descriptions in a later version."
+        actions={
+          <button
+            type="button"
+            className="applications-primary"
+            onClick={() => setAdding(true)}
+            disabled={adding}
+          >
+            + Add skill
           </button>
-        </div>
-      </form>
+        }
+      />
+
+      {/* Same modal and form styles as "Add application" on the board. */}
+      {adding && (
+        <Modal title="Add skill" small onClose={closeModal}>
+          <form className="applications-form" onSubmit={handleAdd}>
+            <h2>Add skill</h2>
+
+            <div className="applications-field">
+              <label htmlFor="skill-name">Skill *</label>
+              <input
+                id="skill-name"
+                type="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                maxLength={MAX_SKILL_LENGTH}
+                placeholder="For example: React"
+                autoFocus
+              />
+            </div>
+
+            {formError && (
+              <p className="applications-error" role="alert">
+                {formError}
+              </p>
+            )}
+
+            <div className="applications-form-actions">
+              <button type="submit" className="applications-primary" disabled={saving}>
+                {saving ? 'Saving...' : 'Save skill'}
+              </button>
+              <button type="button" className="applications-secondary" onClick={closeModal}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
 
       {error && (
         <p className="skills-error" role="alert">
@@ -106,13 +170,36 @@ export default function SkillsPage() {
         </p>
       )}
 
+      {skills.length > 0 && (
+        <div className="skills-filters">
+          <FilterBar
+            activeCount={url.countActive(['search'])}
+            onClear={() => url.clear(['search'])}
+          >
+            <SortMenu
+              options={SORT_OPTIONS}
+              value={sortBy}
+              onChange={(value) => url.update({ sort: value })}
+            />
+            <SearchField
+              value={url.values.search}
+              onChange={(value) => url.update({ search: value })}
+              placeholder="Search skills"
+              label="Search skills"
+            />
+          </FilterBar>
+        </div>
+      )}
+
       {loading ? (
         <p className="skills-muted">Loading...</p>
       ) : skills.length === 0 ? (
         <p className="skills-muted">You have not added any skills yet.</p>
+      ) : visible.length === 0 ? (
+        <p className="skills-muted">No skills match this search.</p>
       ) : (
         <ul className="skills-list">
-          {skills.map((skill) => (
+          {visible.map((skill) => (
             <li key={skill.id}>
               <span>{skill.name}</span>
               <button

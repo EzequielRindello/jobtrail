@@ -29,7 +29,7 @@ export default function ExportCsvButton({ filters }: ExportCsvButtonProps) {
     <>
       <button
         type="button"
-        className="applications-secondary"
+        className="applications-text-button"
         onClick={handleClick}
         disabled={exporting}
       >

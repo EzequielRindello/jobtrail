@@ -14,10 +14,19 @@ export interface ApplicationSummary {
   updatedAt: string;
 }
 
-// What the search box and the stage filter hold. An empty value means "do not filter".
+// Which date the from/to range looks at: when the application was saved or when it was sent.
+export const DATE_FIELDS = ['saved', 'applied'] as const;
+
+export type DateField = (typeof DATE_FIELDS)[number];
+
+// What the board filters hold. An empty value means "do not filter". Dates are yyyy-mm-dd,
+// the format of <input type="date"> and of the API's from/to.
 export interface ApplicationFilterValues {
   search: string;
   stage: ApplicationStage | '';
+  dateField: DateField;
+  from: string;
+  to: string;
 }
 
 // Only title and company are required; the other fields are left out when empty.

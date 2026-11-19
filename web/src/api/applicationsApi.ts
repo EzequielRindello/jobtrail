@@ -19,6 +19,16 @@ export function buildQuery(filters: ApplicationFilterValues): string {
   if (filters.stage !== '') {
     params.set('stage', filters.stage);
   }
+  // The date field only matters when there is a range.
+  if (filters.from !== '' || filters.to !== '') {
+    params.set('dateField', filters.dateField);
+  }
+  if (filters.from !== '') {
+    params.set('from', filters.from);
+  }
+  if (filters.to !== '') {
+    params.set('to', filters.to);
+  }
 
   const query = params.toString();
   return query === '' ? '' : `?${query}`;

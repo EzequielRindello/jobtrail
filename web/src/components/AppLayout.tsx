@@ -54,7 +54,7 @@ export default function AppLayout() {
               Log Out
             </button>
           ) : (
-            <Link to="/login" className="logout-button">
+            <Link to="/login" className="logout-button login-button">
               Log In
             </Link>
           )}

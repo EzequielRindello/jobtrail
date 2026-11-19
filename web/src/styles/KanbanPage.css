@@ -3,7 +3,7 @@
 }
 
 .kanban-toolbar {
-  padding: 24px 24px 12px;
+  padding: 0 0 12px;
   border-bottom: 1px solid var(--jt-border);
 }
 
@@ -19,6 +19,7 @@
   font-size: 30px;
   font-weight: 600;
   margin: 0 0 4px;
+  letter-spacing: normal;
 }
 
 .kanban-toolbar p {
@@ -32,12 +33,13 @@
   color: white;
   border: 1px solid var(--jt-primary);
   border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 12px;
-  font-weight: 500;
+  height: 38px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  text-transform: uppercase;
 }
 
 .kanban-add-button:hover {
@@ -50,25 +52,29 @@
   gap: 12px;
 }
 
-.kanban-toolbar-actions button:not(.kanban-add-button) {
-  background: transparent;
-  border: none;
-  color: var(--jt-muted);
-  font-size: 13px;
-  font-weight: 500;
-  padding: 6px 10px;
-  cursor: pointer;
+.kanban-add-button:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
-.kanban-toolbar-actions button:hover {
-  color: var(--jt-primary);
+/* Search, stage, Filter and Sort (the shared FilterBar, styles in Filters.css). */
+.kanban-filters {
+  margin-top: 16px;
+}
+
+.kanban-toolbar .kanban-status {
+  margin-top: 12px;
+}
+
+.kanban-toolbar .kanban-status-error {
+  color: var(--jt-error);
 }
 
 .kanban-board {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
-  padding: 20px 24px;
+  padding: 20px 0;
   align-items: start;
 }
 
@@ -135,7 +141,7 @@
   border-radius: 8px;
   padding: 0 7px;
   color: var(--jt-primary);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
 }
@@ -143,7 +149,7 @@
 .job-card-date {
   display: block;
   color: var(--jt-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .kanban-mobile-tabs {
@@ -162,7 +168,7 @@
 
 @media (max-width: 600px) {
   .kanban-toolbar {
-    padding: 0px 16px 0px;
+    padding: 0;
   }
 
   .kanban-toolbar-top {
@@ -195,14 +201,15 @@
     position: absolute;
     top: 0;
     right: 0;
-    padding: 8px 12px;
-    font-size: 11px;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
   }
 
   .kanban-mobile-tabs {
     display: flex;
     gap: 8px;
-    padding: 10px 10px 0;
+    padding: 10px 0 0;
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -218,7 +225,7 @@
     border-radius: 8px;
     padding: 8px 10px;
     color: var(--jt-text);
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
   }
 
@@ -236,7 +243,7 @@
   .kanban-board {
     display: flex;
     gap: 12px;
-    padding: 16px;
+    padding: 16px 0;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     overscroll-behavior-x: contain;
@@ -258,7 +265,7 @@
     background: transparent;
     border: none;
     color: var(--jt-text);
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
   }
 }

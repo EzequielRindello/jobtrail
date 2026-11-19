@@ -1,71 +1,8 @@
-.skills-page {
-  max-width: 640px;
-}
-
-.skills-intro,
+/* Full width like the board: header (PageHeader) on top, filters on the right, then the list. */
 .skills-muted {
   margin: 0 0 16px;
   color: var(--jt-muted);
-  font-size: 15px;
-}
-
-.skills-form {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 16px;
-}
-
-.skills-form label {
-  color: var(--jt-text);
   font-size: 14px;
-  font-weight: 600;
-}
-
-.skills-form-row {
-  display: flex;
-  gap: 12px;
-}
-
-.skills-form-row input {
-  flex: 1;
-  min-width: 0;
-  height: 42px;
-  padding: 0 12px;
-  border: 1px solid var(--jt-border);
-  border-radius: 8px;
-  background: var(--bg);
-  color: var(--jt-text);
-  font-size: 15px;
-  font-family: inherit;
-}
-
-.skills-form-row input:focus {
-  outline: none;
-  border-color: var(--jt-primary);
-  box-shadow: 0 0 0 3px rgba(116, 64, 170, 0.1);
-}
-
-.skills-form-row button {
-  height: 42px;
-  padding: 0 18px;
-  border: none;
-  border-radius: 8px;
-  background: var(--jt-primary);
-  color: var(--bg);
-  font-size: 15px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.skills-form-row button:hover:not(:disabled) {
-  background: var(--jt-primary-hover);
-}
-
-.skills-form-row button:disabled {
-  opacity: 0.6;
-  cursor: default;
 }
 
 .skills-error {
@@ -75,10 +12,16 @@
   font-weight: 500;
 }
 
+/* Search and Sort for the list (the shared FilterBar, styles in Filters.css). */
+.skills-filters {
+  margin-bottom: 16px;
+}
+
+/* Cards in a grid that fills the width (as many columns as fit), like the board's cards. */
 .skills-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -91,8 +34,12 @@
   gap: 12px;
   padding: 10px 14px;
   border: 1px solid var(--jt-border);
-  border-radius: 8px;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 3px 12px rgba(27, 21, 50, 0.05);
   color: var(--jt-text);
+  font-size: 14px;
+  font-weight: 500;
   overflow-wrap: anywhere;
 }
 
@@ -110,11 +57,4 @@
 
 .skills-list button:hover {
   text-decoration: underline;
-}
-
-/* Mobile */
-@media (max-width: 700px) {
-  .skills-form-row {
-    flex-direction: column;
-  }
 }
