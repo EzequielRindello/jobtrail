@@ -5,6 +5,9 @@ import type {
   CreateApplicationRequest,
 } from './applicationTypes';
 
+// Re-exported so the board components can keep importing the type from here.
+export type { ApplicationSummary } from './applicationTypes';
+
 // The query string of GET /api/applications: only the filters that have a value.
 export function buildQuery(filters: ApplicationFilterValues): string {
   const params = new URLSearchParams();
@@ -19,6 +22,11 @@ export function buildQuery(filters: ApplicationFilterValues): string {
 
   const query = params.toString();
   return query === '' ? '' : `?${query}`;
+}
+
+// All the user's applications, unfiltered (used by the Kanban board).
+export async function getApplications(): Promise<ApplicationSummary[]> {
+  return apiRequest<ApplicationSummary[]>('/api/applications', undefined, 'GET');
 }
 
 export async function searchApplications(filters: ApplicationFilterValues) {
