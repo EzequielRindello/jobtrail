@@ -1,14 +1,19 @@
 import JobCard from './JobCard';
 import type { ApplicationSummary } from '../../api/applicationsApi';
+import { useDroppable } from '@dnd-kit/core';
+import type { ApplicationStage } from '../../api/applicationTypes';
 
 type KanbanColumnProps = {
+  stage: string;
   title: string;
   applications: ApplicationSummary[];
+  onMove: (id: string, stage: ApplicationStage) => void;
 };
 
-export default function KanbanColumn({ title, applications }: KanbanColumnProps) {
+export default function KanbanColumn({ stage, title, applications, onMove }: KanbanColumnProps) {
+  const { setNodeRef, isOver } = useDroppable({ id: stage });
   return (
-    <div className="kanban-column">
+    <div ref={setNodeRef} className={`kanban-column ${isOver ? 'kanban-column-over' : ''}`}>
       <h2>
         {title}: <span className="kanban-count">{applications.length}</span>
       </h2>
@@ -16,11 +21,13 @@ export default function KanbanColumn({ title, applications }: KanbanColumnProps)
       {applications.map((app) => (
         <JobCard
           key={app.id}
+          id={app.id}
           title={app.title}
           company={app.company}
           location={app.location}
           appliedOn={app.appliedOn}
           stage={app.stage}
+          onMove={onMove}
         />
       ))}
     </div>

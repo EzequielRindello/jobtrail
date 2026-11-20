@@ -3,6 +3,7 @@ import type {
   ApplicationFilterValues,
   ApplicationSummary,
   CreateApplicationRequest,
+  ApplicationStage,
 } from './applicationTypes';
 
 // Re-exported so the board components can keep importing the type from here.
@@ -62,4 +63,9 @@ export async function exportApplications(filters: ApplicationFilterValues) {
 
 export async function createApplication(data: CreateApplicationRequest) {
   return apiRequest<ApplicationSummary>('/api/applications', data);
+}
+
+// Updates an application stage
+export async function changeApplicationStage(id: string, stage: ApplicationStage) {
+  return apiRequest(`/api/applications/${id}/stage`, { stage }, 'PUT');
 }
