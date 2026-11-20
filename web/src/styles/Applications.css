@@ -1,7 +1,8 @@
 /* One size scale for every control (buttons, inputs, selects): 38px high, 14px text,
    13px labels. The board toolbar (KanbanPage.css) uses the same numbers. */
 .applications-primary,
-.applications-secondary {
+.applications-secondary,
+.applications-danger {
   height: 38px;
   padding: 0 16px;
   border-radius: 8px;
@@ -20,6 +21,24 @@
 
 .applications-primary:hover:not(:disabled) {
   background: var(--jt-primary-hover);
+}
+
+/* The confirm button of a delete (ConfirmDeleteModal). */
+.applications-danger {
+  border: none;
+  background: var(--jt-error);
+  color: var(--bg);
+  transition: filter 0.2s ease;
+}
+
+.applications-danger:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+.applications-confirm-message {
+  margin: 0;
+  color: var(--jt-text);
+  font-size: 14px;
 }
 
 .applications-secondary {
@@ -61,13 +80,15 @@
 }
 
 .applications-primary:disabled,
-.applications-secondary:disabled {
+.applications-secondary:disabled,
+.applications-danger:disabled {
   opacity: 0.6;
   cursor: default;
 }
 
 .applications-primary:focus-visible,
-.applications-secondary:focus-visible {
+.applications-secondary:focus-visible,
+.applications-danger:focus-visible {
   outline: 3px solid #bca4e0;
   outline-offset: 3px;
 }
@@ -192,6 +213,16 @@
 .applications-field input,
 .applications-field select {
   height: 38px;
+}
+
+/* Picking a value the browser remembered paints the field with its own gray-blue. Keep the
+   field's white background and text color: the long transition delays the browser's color
+   without touching the focus ring (same fix as the login form in AuthPages.css). */
+.applications-field input:-webkit-autofill,
+.applications-field input:-webkit-autofill:hover,
+.applications-field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--jt-text);
+  transition: background-color 9999s ease-out 0s;
 }
 
 /* The browser's own select arrow looks different in every browser, so it is replaced by

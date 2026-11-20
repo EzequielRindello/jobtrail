@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { addSkill, deleteSkill, getSkills, type Skill } from '../api/skillsApi';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Modal from '../components/Modal';
 import PageHeader from '../components/PageHeader';
 import FilterBar from '../components/filters/FilterBar';
@@ -38,6 +39,8 @@ export default function SkillsPage() {
   const [adding, setAdding] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
+  // The skill the user is being asked to confirm removing, if any.
+  const [skillToDelete, setSkillToDelete] = useState<Skill | null>(null);
   const url = useUrlFilters(URL_DEFAULTS);
   const sortBy: SortOption = url.values.sort === 'za' ? 'za' : 'az';
 
@@ -100,14 +103,11 @@ export default function SkillsPage() {
     setFormError('');
   }
 
-  async function handleDelete(id: string) {
-    setError('');
-    try {
-      await deleteSkill(id);
-      setSkills((current) => current.filter((skill) => skill.id !== id));
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Something went wrong');
-    }
+  // Runs when the user confirms in the delete modal. If it throws, the modal shows the error.
+  async function handleDelete(skill: Skill) {
+    await deleteSkill(skill.id);
+    setSkills((current) => current.filter((item) => item.id !== skill.id));
+    setSkillToDelete(null);
   }
 
   return (
@@ -164,6 +164,16 @@ export default function SkillsPage() {
         </Modal>
       )}
 
+      {skillToDelete && (
+        <ConfirmDeleteModal
+          title="Remove skill"
+          message={`"${skillToDelete.name}" will be removed from your skills.`}
+          confirmLabel="Remove"
+          onConfirm={() => handleDelete(skillToDelete)}
+          onCancel={() => setSkillToDelete(null)}
+        />
+      )}
+
       {error && (
         <p className="skills-error" role="alert">
           {error}
@@ -205,7 +215,7 @@ export default function SkillsPage() {
               <button
                 type="button"
                 aria-label={`Remove ${skill.name}`}
-                onClick={() => handleDelete(skill.id)}
+                onClick={() => setSkillToDelete(skill)}
               >
                 Remove
               </button>

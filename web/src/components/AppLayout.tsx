@@ -1,5 +1,6 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../api/authApi';
+import { isLoggedIn as hasSession } from '../utils/authSession';
 
 import '../styles/AppLayout.css';
 
@@ -7,7 +8,7 @@ export default function AppLayout() {
   const navigate = useNavigate();
   useLocation();
 
-  const isLoggedIn = Boolean(localStorage.getItem('token'));
+  const isLoggedIn = hasSession();
 
   async function handleLogout() {
     try {
@@ -22,7 +23,10 @@ export default function AppLayout() {
     <div className="app-layout">
       <header className="app-header">
         <div className="header-left">
-          <h1 className="app-logo">JobTrail</h1>
+          {/* Home is the board when signed in and the login page when not. */}
+          <h1 className="app-logo">
+            <Link to={isLoggedIn ? '/kanban' : '/login'}>JobTrail</Link>
+          </h1>
 
           <nav className="app-nav">
             <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}>
