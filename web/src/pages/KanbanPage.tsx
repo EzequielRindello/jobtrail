@@ -1,5 +1,6 @@
+import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { useEffect, useRef, useState } from 'react';
-import { searchApplications } from '../api/applicationsApi';
+import { searchApplications, changeApplicationStage } from '../api/applicationsApi';
 import type { ApplicationSummary } from '../api/applicationsApi';
 import {
   DATE_FIELDS,
@@ -125,6 +126,39 @@ export default function KanbanPage() {
     setReloads((value) => value + 1);
   }
 
+  async function handleMove(id: string, newStage: ApplicationStage) {
+    const application = applications.find((app) => app.id === id);
+
+    if (!application || !STAGES.includes(newStage) || application.stage === newStage) return;
+
+    setMessage('');
+    setLoadError('');
+
+    try {
+      setApplications((current) =>
+        current.map((app) => (app.id === id ? { ...app, stage: newStage } : app)),
+      );
+
+      const updated = await changeApplicationStage(id, newStage);
+
+      setApplications((current) => current.map((app) => (app.id === id ? updated : app)));
+    } catch (error) {
+      setApplications((current) =>
+        current.map((app) => (app.id === id ? { ...app, stage: application.stage } : app)),
+      );
+
+      if (error instanceof Error) {
+        setLoadError(error.message);
+      }
+    }
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    if (!event.over) return;
+
+    handleMove(String(event.active.id), String(event.over.id) as ApplicationStage);
+  }
+
   const goToStage = (index: number) => {
     const board = boardRef.current;
     const column = board?.children[index] as HTMLElement | undefined;
@@ -231,16 +265,19 @@ export default function KanbanPage() {
           </button>
         ))}
       </div>
-
-      <div className="kanban-board" ref={boardRef} onScroll={handleBoardScroll}>
-        {STAGES.map((stage) => (
-          <KanbanColumn
-            key={stage}
-            title={stageLabel(stage)}
-            applications={sorted.filter((app) => app.stage === stage)}
-          />
-        ))}
-      </div>
+      <DndContext onDragEnd={handleDragEnd}>
+        <div className="kanban-board" ref={boardRef} onScroll={handleBoardScroll}>
+          {STAGES.map((stage) => (
+            <KanbanColumn
+              key={stage}
+              stage={stage}
+              title={stageLabel(stage)}
+              applications={sorted.filter((app) => app.stage === stage)}
+              onMove={handleMove}
+            />
+          ))}
+        </div>
+      </DndContext>
     </div>
   );
 }
