@@ -8,7 +8,7 @@ export default function DashboardPage() {
     <>
       <PageHeader title="Dashboard" subtitle="An overview of your job search" />
       <p>
-        Your applications are on the <Link to="/kanban">board</Link>.
+        Your applications are on the <Link to="/kanban">Kanban</Link>.
       </p>
     </>
   );
