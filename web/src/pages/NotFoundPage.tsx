@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import '../styles/NotFoundPage.css';
-import '../styles/NotFoundPage.css';
 
 export default function NotFoundPage() {
   const isLoggedIn = Boolean(localStorage.getItem('token'));
