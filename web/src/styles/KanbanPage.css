@@ -30,7 +30,7 @@
 
 .kanban-add-button {
   background: var(--jt-primary);
-  color: white;
+  color: var(--bg);
   border: 1px solid var(--jt-primary);
   border-radius: 8px;
   height: 38px;
@@ -80,7 +80,7 @@
 }
 
 .kanban-column {
-  background: #f7f6fa;
+  background: var(--jt-surface);
   border: 1px solid var(--jt-border);
   border-radius: 10px;
   padding: 12px;
@@ -100,17 +100,17 @@
 }
 
 .job-card {
-  background: white;
+  background: var(--bg);
   border: 1px solid var(--jt-border);
   border-radius: 10px;
   padding: 8px 12px;
   margin-bottom: 10px;
-  box-shadow: 0 3px 12px rgba(27, 21, 50, 0.05);
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--jt-heading) 5%, transparent);
 }
 
 .job-card:hover {
   border-color: var(--jt-primary);
-  box-shadow: 0 3px 12px rgba(27, 21, 50, 0.09);
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--jt-heading) 9%, transparent);
 }
 
 .job-card-company {
@@ -137,7 +137,7 @@
 
 .job-card-tag {
   display: inline-block;
-  background: #f7f6fa;
+  background: var(--jt-surface);
   border: 1px solid var(--jt-border);
   border-radius: 8px;
   padding: 0 7px;
@@ -168,7 +168,7 @@
 }
 
 .kanban-column-over {
-  background: rgba(122, 88, 148, 0.1);
+  background: color-mix(in srgb, var(--jt-primary) 10%, transparent);
 }
 
 .job-card-dragging {
@@ -230,7 +230,7 @@
 
   .kanban-mobile-tabs button {
     flex-shrink: 0;
-    background: #f7f6fa;
+    background: var(--jt-surface);
     border: 1px solid var(--jt-border);
     border-radius: 8px;
     padding: 8px 10px;
@@ -247,7 +247,7 @@
   .kanban-mobile-tabs button.active {
     background: var(--jt-primary);
     border-color: var(--jt-primary);
-    color: white;
+    color: var(--bg);
   }
 
   .kanban-board {
@@ -290,10 +290,10 @@
     z-index: 10;
     min-width: 150px;
     padding: 6px;
-    background: white;
+    background: var(--bg);
     border: 1px solid var(--jt-border);
     border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(27, 21, 50, 0.15);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--jt-heading) 15%, transparent);
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -314,7 +314,7 @@
   }
 
   .job-card-stage-options button:hover {
-    background: #f7f6fa;
+    background: var(--jt-surface);
     color: var(--jt-primary);
   }
 }

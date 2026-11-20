@@ -66,6 +66,9 @@ export async function createApplication(data: CreateApplicationRequest) {
 }
 
 // Updates an application stage
-export async function changeApplicationStage(id: string, stage: ApplicationStage) {
-  return apiRequest(`/api/applications/${id}/stage`, { stage }, 'PUT');
+export async function changeApplicationStage(
+  id: string,
+  stage: ApplicationStage,
+): Promise<ApplicationSummary> {
+  return apiRequest<ApplicationSummary>(`/api/applications/${id}/stage`, { stage }, 'PUT');
 }

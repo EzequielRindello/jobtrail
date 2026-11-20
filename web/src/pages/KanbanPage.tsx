@@ -1,3 +1,4 @@
+import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { useEffect, useRef, useState } from 'react';
 import { searchApplications, changeApplicationStage } from '../api/applicationsApi';
 import type { ApplicationSummary } from '../api/applicationsApi';
@@ -17,7 +18,6 @@ import SortMenu from '../components/filters/SortMenu';
 import KanbanColumn from '../components/kanban/KanbanColumn';
 import { useUrlFilters } from '../hooks/useUrlFilters';
 import '../styles/KanbanPage.css';
-import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 
 // The orders the Sort menu offers. The sorting happens here, on the cards already loaded.
 const SORT_OPTIONS = [
@@ -139,7 +139,9 @@ export default function KanbanPage() {
         current.map((app) => (app.id === id ? { ...app, stage: newStage } : app)),
       );
 
-      await changeApplicationStage(id, newStage);
+      const updated = await changeApplicationStage(id, newStage);
+
+      setApplications((current) => current.map((app) => (app.id === id ? updated : app)));
     } catch (error) {
       setApplications((current) =>
         current.map((app) => (app.id === id ? { ...app, stage: application.stage } : app)),

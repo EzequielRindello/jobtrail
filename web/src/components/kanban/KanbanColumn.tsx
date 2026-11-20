@@ -1,6 +1,6 @@
+import { useDroppable } from '@dnd-kit/core';
 import JobCard from './JobCard';
 import type { ApplicationSummary } from '../../api/applicationsApi';
-import { useDroppable } from '@dnd-kit/core';
 import type { ApplicationStage } from '../../api/applicationTypes';
 
 type KanbanColumnProps = {
