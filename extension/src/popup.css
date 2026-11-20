@@ -1,25 +1,33 @@
+/* Same palette as the web app (--jt-* variables in web/src/index.css). The web app has
+   no dark theme, so the dark values below are purple tints of the same colors. */
 :root {
-  --text: #1f2933;
-  --muted: #616e7c;
-  --border: #d9e2ec;
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --error: #b42318;
+  --text: #211b35;
+  --heading: #1b1532;
+  --muted: #696b80;
+  --border: #ccc9db;
+  --accent: #67349e;
+  --accent-hover: #542683;
+  --on-accent: #ffffff;
+  --focus: #bca4e0;
+  --error: #b42342;
   --surface: #ffffff;
-  --field: #f5f7fa;
+  --field: #ffffff;
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #e4e7eb;
-    --muted: #9aa5b1;
-    --border: #3e4c59;
-    --accent: #60a5fa;
-    --accent-hover: #93c5fd;
-    --error: #f97066;
-    --surface: #1f2933;
-    --field: #323f4b;
+    --text: #e8e4f2;
+    --heading: #ffffff;
+    --muted: #aaa6c0;
+    --border: #42395c;
+    --accent: #b794e6;
+    --accent-hover: #cdb4f0;
+    --on-accent: #1b1532;
+    --focus: #7d5bb0;
+    --error: #f08aa2;
+    --surface: #1b1532;
+    --field: #2a2245;
   }
 }
 
@@ -71,6 +79,7 @@ main {
 
 h1 {
   margin: 0;
+  color: var(--heading);
   font-size: 16px;
   line-height: 1.3;
 }
@@ -88,7 +97,8 @@ label {
   font-weight: 600;
 }
 
-input {
+input,
+textarea {
   padding: 7px 9px;
   font: inherit;
   color: var(--text);
@@ -97,11 +107,29 @@ input {
   border-radius: 6px;
 }
 
+textarea {
+  resize: vertical;
+  font-weight: 400;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus);
+}
+
+.field-error {
+  color: var(--error);
+  font-size: 13px;
+  font-weight: 400;
+}
+
 button {
   padding: 8px 12px;
   font: inherit;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--on-accent);
   background: var(--accent);
   border: 0;
   border-radius: 6px;
@@ -110,6 +138,11 @@ button {
 
 button:hover {
   background: var(--accent-hover);
+}
+
+button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 
 button:disabled {
@@ -127,34 +160,6 @@ button:disabled {
 .link-button:hover {
   background: none;
   text-decoration: underline;
-}
-
-.fields {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 10px;
-  margin: 0;
-}
-
-.fields dt {
-  color: var(--muted);
-}
-
-.fields dd {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.url {
-  color: var(--muted);
-}
-
-.description {
-  margin: 0;
-  max-height: 96px;
-  overflow: hidden;
-  color: var(--muted);
-  white-space: pre-line;
 }
 
 .muted {

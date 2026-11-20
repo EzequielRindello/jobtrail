@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../api/authApi';
 import '../styles/AuthPages.css';
+import { setToken } from '../utils/authSession';
 import { validateEmail, validatePassword } from '../utils/authValidation';
 
 export default function RegisterPage() {
@@ -35,8 +36,8 @@ export default function RegisterPage() {
 
     try {
       const result = await register({ displayName, email, password });
-      localStorage.setItem('token', result.token);
-      navigate('/dashboard');
+      setToken(result.token);
+      navigate('/kanban');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Something went wrong');
     }

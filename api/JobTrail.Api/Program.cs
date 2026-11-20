@@ -21,6 +21,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ApplicationService>();
+builder.Services.AddScoped<SkillService>();
 builder.Services.AddScoped<DemoSeedService>();
 
 builder.Services.AddJwtAuthentication(builder.Configuration);

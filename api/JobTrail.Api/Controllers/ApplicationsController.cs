@@ -18,6 +18,13 @@ public class ApplicationsController(ApplicationService applicationService) : Con
         return Ok(await applicationService.SearchAsync(User.GetUserId(), rq, cancellationToken));
     }
 
+    [HttpGet("export")]
+    [Produces("text/csv")]
+    public async Task<FileContentResult> Export([FromQuery] SearchApplicationsRequest rq, CancellationToken cancellationToken)
+    {
+        return File(await applicationService.ExportAsync(User.GetUserId(), rq, cancellationToken), "text/csv", "jobtrail-applications.csv");
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ApplicationResponse>> Get(Guid id, CancellationToken cancellationToken)
     {

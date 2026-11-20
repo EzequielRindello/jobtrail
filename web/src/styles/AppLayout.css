@@ -23,9 +23,14 @@
 
 .app-logo {
   margin: 0;
-  color: #171717;
   font-size: 22px;
   font-weight: 700;
+}
+
+/* The logo is a link, so it keeps the plain logo look instead of the link style. */
+.app-logo a {
+  color: #171717;
+  text-decoration: none;
 }
 
 .app-nav {
@@ -86,6 +91,18 @@
 
 .logout-button:hover {
   background: #f5f6f8;
+}
+
+/* Log In is the main action when there is no session, so it uses the primary color. */
+.login-button {
+  border-color: var(--jt-primary);
+  background: var(--jt-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.login-button:hover {
+  background: var(--jt-primary-hover);
 }
 
 .app-content {

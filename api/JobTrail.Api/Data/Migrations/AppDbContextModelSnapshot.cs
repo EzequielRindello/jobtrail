@@ -211,6 +211,33 @@ namespace JobTrail.Api.Data.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("JobTrail.Api.Models.UserSkill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_skills");
+
+                    b.HasIndex("UserId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_skills_user_id_name");
+
+                    b.ToTable("user_skills", (string)null);
+                });
+
             modelBuilder.Entity("JobTrail.Api.Models.Application", b =>
                 {
                     b.HasOne("JobTrail.Api.Models.User", null)
@@ -239,6 +266,16 @@ namespace JobTrail.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_revoked_tokens_users_user_id");
+                });
+
+            modelBuilder.Entity("JobTrail.Api.Models.UserSkill", b =>
+                {
+                    b.HasOne("JobTrail.Api.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_skills_users_user_id");
                 });
 
             modelBuilder.Entity("JobTrail.Api.Models.Application", b =>

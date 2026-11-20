@@ -1,0 +1,266 @@
+/* One size scale for every control (buttons, inputs, selects): 38px high, 14px text,
+   13px labels. The board toolbar (KanbanPage.css) uses the same numbers. */
+.applications-primary,
+.applications-secondary,
+.applications-danger {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.applications-primary {
+  border: none;
+  background: var(--jt-primary);
+  color: var(--bg);
+  transition: background 0.2s ease;
+}
+
+.applications-primary:hover:not(:disabled) {
+  background: var(--jt-primary-hover);
+}
+
+/* The confirm button of a delete (ConfirmDeleteModal). */
+.applications-danger {
+  border: none;
+  background: var(--jt-error);
+  color: var(--bg);
+  transition: filter 0.2s ease;
+}
+
+.applications-danger:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+.applications-confirm-message {
+  margin: 0;
+  color: var(--jt-text);
+  font-size: 14px;
+}
+
+.applications-secondary {
+  border: 1px solid var(--jt-border);
+  background: var(--bg);
+  color: var(--jt-text);
+}
+
+.applications-secondary:hover:not(:disabled) {
+  border-color: var(--jt-primary);
+  color: var(--jt-primary);
+}
+
+/* A button that looks like a text link (Export CSV). */
+.applications-text-button {
+  height: 38px;
+  padding: 0 4px;
+  border: none;
+  background: none;
+  color: var(--jt-primary);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.applications-text-button:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.applications-text-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.applications-text-button:focus-visible {
+  outline: 3px solid #bca4e0;
+  outline-offset: 2px;
+}
+
+.applications-primary:disabled,
+.applications-secondary:disabled,
+.applications-danger:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.applications-primary:focus-visible,
+.applications-secondary:focus-visible,
+.applications-danger:focus-visible {
+  outline: 3px solid #bca4e0;
+  outline-offset: 3px;
+}
+
+.applications-message {
+  margin: 0;
+  color: var(--jt-muted);
+  font-size: 14px;
+}
+
+.applications-error {
+  margin: 0;
+  color: var(--jt-error);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.applications-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 760px;
+  padding: 20px;
+  border: 1px solid var(--jt-border);
+  border-radius: 12px;
+}
+
+.applications-modal {
+  /* At the top of the page instead of the browser's default, the center. */
+  margin: 24px auto auto;
+  width: min(760px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  background: var(--bg);
+  overflow: auto;
+}
+
+.applications-modal-small {
+  width: min(440px, calc(100vw - 32px));
+}
+
+.applications-modal::backdrop {
+  background: rgba(27, 21, 50, 0.55);
+}
+
+.applications-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--jt-muted);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.applications-modal-close:hover {
+  background: #f5f6f8;
+  color: var(--jt-text);
+}
+
+.applications-modal-close:focus-visible {
+  outline: 3px solid #bca4e0;
+  outline-offset: 2px;
+}
+
+/* Leaves room for the X button next to the title. */
+.applications-modal .applications-form h2 {
+  padding-right: 40px;
+}
+
+/* Inside the modal the window is the box, so the form needs no box of its own. */
+.applications-modal .applications-form {
+  max-width: none;
+  border: none;
+}
+
+.applications-form h2 {
+  margin: 0;
+  color: var(--jt-heading);
+  font-size: 20px;
+}
+
+.applications-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+
+.applications-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.applications-field label {
+  color: var(--jt-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.applications-field input,
+.applications-field select,
+.applications-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--jt-border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--jt-text);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.applications-field input,
+.applications-field select {
+  height: 38px;
+}
+
+/* Picking a value the browser remembered paints the field with its own gray-blue. Keep the
+   field's white background and text color: the long transition delays the browser's color
+   without touching the focus ring (same fix as the login form in AuthPages.css). */
+.applications-field input:-webkit-autofill,
+.applications-field input:-webkit-autofill:hover,
+.applications-field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--jt-text);
+  transition: background-color 9999s ease-out 0s;
+}
+
+/* The browser's own select arrow looks different in every browser, so it is replaced by
+   one chevron in the app's muted color. */
+.applications-field select {
+  appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23696b80' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
+
+.applications-field textarea {
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.applications-field input:focus,
+.applications-field select:focus,
+.applications-field textarea:focus {
+  outline: none;
+  border-color: var(--jt-primary);
+  box-shadow: 0 0 0 3px rgba(116, 64, 170, 0.1);
+}
+
+.applications-form-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .applications-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .applications-form-actions {
+    flex-direction: column;
+  }
+}

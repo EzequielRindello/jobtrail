@@ -83,14 +83,20 @@ Tests: `dotnet test` from `api/` (they use an in-memory database, so PostgreSQL 
 
 ### 3. Web app
 
-From `web/`:
+From `web/`, tell the web app where the API is by creating the file `web/.env.local` (it is not committed) with this line:
+
+```
+VITE_API_BASE_URL=http://localhost:5080
+```
+
+Then:
 
 ```bash
 npm install
 npm run dev
 ```
 
-The web app runs on **http://localhost:5173** (the API accepts requests from this origin).
+Without that variable the web app calls its own address and cannot reach the API. It runs on **http://localhost:5173** (the API accepts requests from this origin). Sign in with your account or the demo user.
 
 ### 4. Browser extension
 
@@ -109,7 +115,7 @@ Then load it in the browser:
 
 After changing the code, run `npm run build` again and click the reload button of JobTrail in `chrome://extensions`. `npm run watch` rebuilds on every save. Tests: `npm test`.
 
-The extension reads the job from the [schema.org JobPosting](https://schema.org/JobPosting) data that many job sites publish for search engines. Pages without it show "This page has no job data". It talks to the API at `http://localhost:5080`; to point it somewhere else, build with `VITE_API_URL` (and `VITE_WEB_URL` for the board link) and add that URL to `host_permissions` in `extension/public/manifest.json`.
+The extension reads the job from the [schema.org JobPosting](https://schema.org/JobPosting) data that many job sites publish for search engines. The popup shows what it found in a form, so you can fix any field before saving. On pages without it, the popup says so and offers **Enter it manually**. It talks to the API at `http://localhost:5080`; to point it somewhere else, build with `VITE_API_URL` (and `VITE_WEB_URL` for the board link) and add that URL to `host_permissions` in `extension/public/manifest.json`.
 
 ### Environment variables (deployment)
 
@@ -120,6 +126,8 @@ Locally everything above is enough. On a server, set these instead of user-secre
 | `ConnectionStrings__Default` | `Host=...;Database=...;Username=...;Password=...`            |
 | `Jwt__Key`                   | random string, at least 32 characters                        |
 | `Cors__AllowedOrigins__0`    | URL of the deployed web app, e.g. `https://jobtrail.example` |
+
+The web app also needs `VITE_API_BASE_URL` (the URL of the deployed API) when it is built, because Vite writes it into the files at build time.
 
 ## API
 
@@ -139,6 +147,7 @@ All endpoints are documented in Swagger.
 | Endpoint                           | Body                                     | Result                                                    |
 | ---------------------------------- | ---------------------------------------- | --------------------------------------------------------- |
 | `GET /api/applications`            |                                          | `200` with the list for the board, newest first           |
+| `GET /api/applications/export`     |                                          | `200` CSV file (same filters as the list, see below)      |
 | `GET /api/applications/{id}`       |                                          | `200` with every field and `history` (its stage changes)  |
 | `POST /api/applications`           | `{ title, company, ...details, stage? }` | `200` with the new application; `stage` defaults to saved |
 | `PUT /api/applications/{id}`       | `{ title, company, ...details }`         | `200`. Replaces the details; the stage does not change    |
@@ -147,6 +156,16 @@ All endpoints are documented in Swagger.
 
 - **Details:** `location`, `url`, `description`, `salaryRange`, `contactName`, `contactEmail`, `resumeVersion`, `notes` and `appliedOn` (`YYYY-MM-DD`). `title` and `company` are required.
 - **Stages:** `saved`, `applied`, `interview`, `offer` and `rejected`. Moving an application to `applied` fills `appliedOn` with today if it is empty.
+  **Skills** (all need the token; each user only sees and changes their own, any other id gives `404`)
+
+| Endpoint                  | Body       | Result                                                     |
+| ------------------------- | ---------- | ---------------------------------------------------------- |
+| `GET /api/skills`         |            | `200` with the user's skills, sorted by name               |
+| `POST /api/skills`        | `{ name }` | `200` with the new skill; `409` if the user already has it |
+| `DELETE /api/skills/{id}` |            | `204`                                                      |
+
+A skill name is up to 50 characters, and two names that differ only in upper or lower case count as the same skill.
+
 - **Filters:** `GET /api/applications` takes these, all optional: `search` (company or job title, any case), `stage`, `from` and `to` (`YYYY-MM-DD`, both days included), and `dateField` (`saved`, the default, or `applied`) to choose which date `from`/`to` filter by. Days are UTC days.
 
 Send the token on every protected request as `Authorization: Bearer <token>`. Tokens last 7 days. Errors use the standard [ProblemDetails](https://www.rfc-editor.org/rfc/rfc9457) JSON format, and validation errors (`400`) list the problem for each field under `errors`.

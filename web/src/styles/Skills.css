@@ -1,0 +1,60 @@
+/* Full width like the board: header (PageHeader) on top, filters on the right, then the list. */
+.skills-muted {
+  margin: 0 0 16px;
+  color: var(--jt-muted);
+  font-size: 14px;
+}
+
+.skills-error {
+  margin: 0 0 16px;
+  color: var(--jt-error);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Search and Sort for the list (the shared FilterBar, styles in Filters.css). */
+.skills-filters {
+  margin-bottom: 16px;
+}
+
+/* Cards in a grid that fills the width (as many columns as fit), like the board's cards. */
+.skills-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skills-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--jt-border);
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 3px 12px rgba(27, 21, 50, 0.05);
+  color: var(--jt-text);
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.skills-list button {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--jt-error);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.skills-list button:hover {
+  text-decoration: underline;
+}
