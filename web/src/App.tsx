@@ -20,8 +20,9 @@ function App() {
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/kanban" element={<KanbanPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="*" element={<NotFoundPage />} />
         </Route>
+
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );
