@@ -1,5 +1,6 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../api/authApi';
+import { isLoggedIn as hasSession } from '../utils/authSession';
 
 import '../styles/AppLayout.css';
 
@@ -7,7 +8,7 @@ export default function AppLayout() {
   const navigate = useNavigate();
   useLocation();
 
-  const isLoggedIn = Boolean(localStorage.getItem('token'));
+  const isLoggedIn = hasSession();
 
   async function handleLogout() {
     try {

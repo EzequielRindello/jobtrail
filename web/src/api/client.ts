@@ -1,3 +1,5 @@
+import { getToken } from '../utils/authSession';
+
 const API_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 // Shown when the API is down, unreachable or answers with something that is not the API
@@ -38,7 +40,7 @@ async function toError(response: Response): Promise<Error> {
 }
 
 function authHeaders(): Record<string, string> {
-  const token = localStorage.getItem('token');
+  const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 

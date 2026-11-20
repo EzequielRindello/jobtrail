@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
+import { isLoggedIn as hasSession } from '../utils/authSession';
 import '../styles/NotFoundPage.css';
 
 export default function NotFoundPage() {
-  const isLoggedIn = Boolean(localStorage.getItem('token'));
+  const isLoggedIn = hasSession();
 
   return (
     <div className="not-found-page">

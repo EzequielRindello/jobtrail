@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../api/authApi';
 import '../styles/AuthPages.css';
+import { setToken } from '../utils/authSession';
 import { validateEmail } from '../utils/authValidation';
 
 export default function LoginPage() {
@@ -23,7 +24,7 @@ export default function LoginPage() {
 
     try {
       const result = await login({ email, password });
-      localStorage.setItem('token', result.token);
+      setToken(result.token);
       navigate('/kanban');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Something went wrong');
