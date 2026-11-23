@@ -1,4 +1,4 @@
-import { getToken } from '../utils/authSession';
+import { clearToken, getToken } from '../utils/authSession';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -22,18 +22,19 @@ function isJson(response: Response): boolean {
 
 // Turns a failed answer into a message a user can read: the API's own message when it sent
 // one (validation errors first), otherwise a plain sentence instead of a parser error.
-async function toError(response: Response): Promise<Error> {
+async function toError(response: Response, endpoint: string): Promise<Error> {
+  if (response.status === 401 && endpoint !== '/api/auth/login') {
+    clearToken();
+    window.location.replace('/login');
+    return new Error(SESSION_EXPIRED);
+  }
+
   if (isJson(response)) {
     const error = await response.json().catch(() => ({}));
     const message = Object.values(error.errors || {}).flat()[0] as string | undefined;
     if (message || error.title) {
       return new Error(message || error.title);
     }
-  }
-
-  // An expired or missing token gets a 401 with no body.
-  if (response.status === 401) {
-    return new Error(SESSION_EXPIRED);
   }
 
   return new Error(SERVER_UNAVAILABLE);
@@ -50,7 +51,7 @@ export async function apiDownload(endpoint: string): Promise<Blob> {
 
   // An HTML page here means the request did not reach the API, so it is not the file.
   if (!response.ok || (response.headers.get('content-type') ?? '').includes('html')) {
-    throw await toError(response);
+    throw await toError(response, endpoint);
   }
 
   return response.blob();
@@ -68,7 +69,7 @@ export async function apiRequest<T = unknown>(
   });
 
   if (!response.ok) {
-    throw await toError(response);
+    throw await toError(response, endpoint);
   }
 
   if (response.status === 204) {
