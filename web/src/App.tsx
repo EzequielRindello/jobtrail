@@ -11,6 +11,7 @@ import SkillsPage from './pages/SkillsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import NotFoundPage from './pages/NotFoundPage';
 import KanbanPage from './pages/KanbanPage';
+import PolicyPage from './pages/PolicyPage';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           </Route>
 
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/policy" element={<PolicyPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
