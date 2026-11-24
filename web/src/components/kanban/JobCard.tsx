@@ -1,14 +1,27 @@
 import { ChevronRight } from 'lucide-react';
 import { useDraggable } from '@dnd-kit/core';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { Link } from 'react-router-dom';
 import { STAGES, type ApplicationStage } from '../../api/applicationTypes';
+
+// "Nov 10": short, in the user's language.
+function formatDay(date: Date) {
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+// appliedOn is a plain "yyyy-mm-dd" day; new Date() would read it as UTC midnight and could
+// show the day before, so it is built as a local date.
+function fromDateOnly(day: string) {
+  const [year, month, date] = day.split('-').map(Number);
+  return new Date(year, month - 1, date);
+}
 
 type JobCardProps = {
   id: string;
   title: string;
   company: string;
-  location?: string | null;
   appliedOn?: string | null;
+  createdAt: string;
   stage: string;
   onMove: (id: string, stage: ApplicationStage) => void;
 };
@@ -17,8 +30,8 @@ export default function JobCard({
   id,
   title,
   company,
-  location,
   appliedOn,
+  createdAt,
   stage,
   onMove,
 }: JobCardProps) {
@@ -67,49 +80,65 @@ export default function JobCard({
       {...listeners}
       {...attributes}
     >
-      <p className="job-card-company">{company}</p>
-
-      <h3>{title}</h3>
-
-      {location && (
-        <div className="job-card-tags">
-          <span className="job-card-tag">{location}</span>
+      {/* Only what is needed to recognize the job; the rest is on the details page. */}
+      <div className="job-card-header">
+        <span className="job-card-avatar" aria-hidden="true">
+          {company.trim().charAt(0).toUpperCase()}
+        </span>
+        <div className="job-card-heading">
+          {/* The title opens the details page. Stopping pointerdown keeps it from starting a drag. */}
+          <h3>
+            <Link
+              to={`/applications/${id}`}
+              className="job-card-link"
+              onPointerDown={(event) => event.stopPropagation()}
+            >
+              {title}
+            </Link>
+          </h3>
+          <p className="job-card-company">{company}</p>
         </div>
-      )}
+      </div>
 
-      <small className="job-card-date">{appliedOn ? `Applied ${appliedOn}` : stage}</small>
-      <div className="job-card-move-container" ref={menuRef}>
-        <button
-          type="button"
-          className="job-card-move"
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={() => {
-            if (!showStages) {
-              window.dispatchEvent(new CustomEvent('job-card-menu-open', { detail: id }));
-            }
-            setShowStages(!showStages);
-          }}
-        >
-          Move to <ChevronRight size={14} strokeWidth={2} />
-        </button>
+      <div className="job-card-footer">
+        <small className="job-card-date">
+          {appliedOn
+            ? `Applied ${formatDay(fromDateOnly(appliedOn))}`
+            : `Saved ${formatDay(new Date(createdAt))}`}
+        </small>
+        <div className="job-card-move-container" ref={menuRef}>
+          <button
+            type="button"
+            className="job-card-move"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={() => {
+              if (!showStages) {
+                window.dispatchEvent(new CustomEvent('job-card-menu-open', { detail: id }));
+              }
+              setShowStages(!showStages);
+            }}
+          >
+            Move to <ChevronRight size={14} strokeWidth={2} />
+          </button>
 
-        {showStages && (
-          <div className="job-card-stage-options">
-            {STAGES.filter((option) => option !== stage).map((option) => (
-              <button
-                key={option}
-                type="button"
-                onPointerDown={(event) => event.stopPropagation()}
-                onClick={() => {
-                  onMove(id, option);
-                  setShowStages(false);
-                }}
-              >
-                {option.charAt(0).toUpperCase() + option.slice(1)}
-              </button>
-            ))}
-          </div>
-        )}
+          {showStages && (
+            <div className="job-card-stage-options">
+              {STAGES.filter((option) => option !== stage).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={() => {
+                    onMove(id, option);
+                    setShowStages(false);
+                  }}
+                >
+                  {option.charAt(0).toUpperCase() + option.slice(1)}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
-/* Toasts: one fixed region at the top right, just under the header, above every page. */
+/* Toasts: one fixed region at the top right, above every page (and over the header). */
 .toast-region {
   position: fixed;
-  top: 82px;
+  top: 16px;
   right: 24px;
   z-index: 1000;
   display: flex;

@@ -12,6 +12,7 @@ import SkillsPage from './pages/SkillsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import NotFoundPage from './pages/NotFoundPage';
 import KanbanPage from './pages/KanbanPage';
+import ApplicationDetailsPage from './pages/ApplicationDetailsPage';
 import PolicyPage from './pages/PolicyPage';
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/skills" element={<SkillsPage />} />
               <Route path="/kanban" element={<KanbanPage />} />
+              <Route path="/applications/:id" element={<ApplicationDetailsPage />} />
             </Route>
 
             <Route path="/privacy" element={<PrivacyPage />} />

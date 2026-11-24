@@ -85,7 +85,7 @@ public class ApplicationService
     {
         ValidateSave(rq);
 
-        var now = _timeProvider.GetUtcNow();
+        var now = GetNow();
         var application = new Application
         {
             Id = Guid.CreateVersion7(),
@@ -110,7 +110,7 @@ public class ApplicationService
 
         var application = await FindAsync(userId, applicationId, cancellationToken);
         CopyDetails(rq, application);
-        application.UpdatedAt = _timeProvider.GetUtcNow();
+        application.UpdatedAt = GetNow();
 
         await _db.SaveChangesAsync(cancellationToken);
 
@@ -138,7 +138,7 @@ public class ApplicationService
             return CreateResponse(application);
         }
 
-        var now = _timeProvider.GetUtcNow();
+        var now = GetNow();
         // Added through the DbSet: a new row with its id already set, found only through the
         // navigation, would be taken for an existing one and updated instead of inserted.
         _db.ApplicationStageChanges.Add(CreateStageChange(application, application.Stage, rq.Stage, now));
@@ -229,6 +229,15 @@ public class ApplicationService
     #endregion
 
     #region Private Helpers
+
+    // PostgreSQL keeps microseconds and .NET keeps 100 ns ticks. Cutting the extra digit here makes
+    // the answer of a save equal to what a later read returns, so the web does not see a change
+    // that never happened (the board's "New updates available" compares these dates).
+    private DateTimeOffset GetNow()
+    {
+        var now = _timeProvider.GetUtcNow();
+        return now.AddTicks(-(now.Ticks % TimeSpan.TicksPerMicrosecond));
+    }
 
     private async Task<Application> FindAsync(Guid userId, Guid applicationId, CancellationToken cancellationToken)
     {

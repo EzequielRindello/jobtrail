@@ -256,6 +256,19 @@ public class ApplicationServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task ChangeStage_ReturnsDatesWithTheDatabasePrecision()
+    {
+        var created = await CreateAsync(Me, "Backend Developer", "Fictional Labs");
+        // 1.2345678 seconds: the last digit (100 ns) is finer than PostgreSQL's microseconds.
+        clock.Advance(TimeSpan.FromTicks(12_345_678));
+
+        var response = await applicationService.ChangeStageAsync(Me, created.Id, new ChangeStageRequest { Stage = ApplicationStage.Applied }, CancellationToken.None);
+
+        Assert.Equal(0, response.UpdatedAt.Ticks % TimeSpan.TicksPerMicrosecond);
+        Assert.Equal(TestHelpers.Now.AddTicks(12_345_670), response.UpdatedAt);
+    }
+
+    [Fact]
     public async Task ChangeStage_ToTheSameStage_AddsNoHistory()
     {
         var created = await CreateAsync(Me, "Backend Developer", "Fictional Labs");
