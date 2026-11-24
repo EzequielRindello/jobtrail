@@ -59,14 +59,20 @@ export default function AddApplicationForm({ onCreated, onCancel }: AddApplicati
       <div className="applications-form-grid">
         <div className="applications-field">
           <label htmlFor="add-title">
-            Job title <span className="required-mark" aria-hidden="true">*</span>
+            Job title{' '}
+            <span className="required-mark" aria-hidden="true">
+              *
+            </span>
           </label>
           <input id="add-title" name="title" type="text" maxLength={200} required />
         </div>
 
         <div className="applications-field">
           <label htmlFor="add-company">
-            Company <span className="required-mark" aria-hidden="true">*</span>
+            Company{' '}
+            <span className="required-mark" aria-hidden="true">
+              *
+            </span>
           </label>
           <input id="add-company" name="company" type="text" maxLength={200} required />
         </div>

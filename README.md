@@ -123,20 +123,20 @@ The popup checks your board before saving. If the link is already saved, or anot
 
 The extension has no list of sites: it reads any page that publishes `JobPosting` data. These are the sites checked on real posts (November 2026):
 
-| Site | Result |
-| --- | --- |
-| Lever | Works |
-| Greenhouse (company career pages) | Works |
-| Ashby | Works |
-| Workable | Works |
-| Workday | Works (when a company sends an empty name, as Adobe does, it is taken from the site address) |
-| Greenhouse (`job-boards.greenhouse.io` hosted pages) | Manual only |
-| SmartRecruiters | Manual only |
-| LinkedIn | Manual only |
-| Indeed | Manual only |
-| Get on Board | Manual only |
-| We Work Remotely | Manual only |
-| Glassdoor | Works on a single job page (`/job-listing/...`). The search page with a job open on the side has no job data |
+| Site                                                 | Result                                                                                                       |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Lever                                                | Works                                                                                                        |
+| Greenhouse (company career pages)                    | Works                                                                                                        |
+| Ashby                                                | Works                                                                                                        |
+| Workable                                             | Works                                                                                                        |
+| Workday                                              | Works (when a company sends an empty name, as Adobe does, it is taken from the site address)                 |
+| Greenhouse (`job-boards.greenhouse.io` hosted pages) | Manual only                                                                                                  |
+| SmartRecruiters                                      | Manual only                                                                                                  |
+| LinkedIn                                             | Manual only                                                                                                  |
+| Indeed                                               | Manual only                                                                                                  |
+| Get on Board                                         | Manual only                                                                                                  |
+| We Work Remotely                                     | Manual only                                                                                                  |
+| Glassdoor                                            | Works on a single job page (`/job-listing/...`). The search page with a job open on the side has no job data |
 
 **Works**: title and company are found. **Needs fix**: the popup opens but a field must be filled by hand. **Manual only**: the page has no job data, so the popup offers **Enter it manually**.
 
