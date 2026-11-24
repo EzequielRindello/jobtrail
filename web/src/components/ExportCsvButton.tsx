@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { exportApplications } from '../api/applicationsApi';
 import type { ApplicationFilterValues } from '../api/applicationTypes';
+import { useToast } from '../hooks/useToast';
+import { getErrorMessage } from '../utils/errorMessage';
 
 import '../styles/Applications.css';
 
@@ -11,35 +13,28 @@ interface ExportCsvButtonProps {
 
 export default function ExportCsvButton({ filters }: ExportCsvButtonProps) {
   const [exporting, setExporting] = useState(false);
-  const [error, setError] = useState('');
+  const { showToast } = useToast();
 
   async function handleClick() {
-    setError('');
     setExporting(true);
     try {
       await exportApplications(filters);
+      showToast({ kind: 'success', message: 'CSV downloaded.' });
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Something went wrong');
+      showToast({ kind: 'error', message: getErrorMessage(error) });
     } finally {
       setExporting(false);
     }
   }
 
   return (
-    <>
-      <button
-        type="button"
-        className="applications-text-button"
-        onClick={handleClick}
-        disabled={exporting}
-      >
-        {exporting ? 'Exporting...' : 'Export CSV'}
-      </button>
-      {error && (
-        <p className="applications-error" role="alert">
-          {error}
-        </p>
-      )}
-    </>
+    <button
+      type="button"
+      className="applications-text-button"
+      onClick={handleClick}
+      disabled={exporting}
+    >
+      {exporting ? 'Exporting...' : 'Export CSV'}
+    </button>
   );
 }

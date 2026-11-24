@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getErrorMessage } from '../utils/errorMessage';
 import Modal from './Modal';
 
 import '../styles/Applications.css';
@@ -29,7 +30,7 @@ export default function ConfirmDeleteModal({
     try {
       await onConfirm();
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Something went wrong');
+      setError(getErrorMessage(error));
       setBusy(false);
     }
   }

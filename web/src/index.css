@@ -17,6 +17,12 @@
   --jt-muted: #696b80;
   --jt-border: #ccc9db;
   --jt-error: #b42342;
+  --jt-success: #1f7a4d;
+  --jt-focus: #bca4e0;
+  /* Text on a solid background of that color (all pass WCAG AA, 4.5:1 or more, with white). */
+  --jt-on-primary: #fff;
+  --jt-on-success: #fff;
+  --jt-on-error: #fff;
   --jt-surface: #f7f6fa;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;

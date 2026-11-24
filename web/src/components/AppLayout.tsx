@@ -3,6 +3,7 @@ import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 import { logout } from '../api/authApi';
 import { setSessionExpiredHandler } from '../api/client';
+import { useToast } from '../hooks/useToast';
 import { isLoggedIn as hasSession } from '../utils/authSession';
 
 import '../styles/AppLayout.css';
@@ -11,22 +12,31 @@ export default function AppLayout() {
   const navigate = useNavigate();
   useLocation();
 
+  const { showToast } = useToast();
+
   useEffect(() => {
     setSessionExpiredHandler(() => {
+      // One id, so several requests failing at once show a single toast.
+      showToast({
+        id: 'session-expired',
+        kind: 'info',
+        message: 'Your session has expired. Please log in again.',
+      });
       navigate('/login', { replace: true });
     });
 
     return () => setSessionExpiredHandler(() => {});
-  }, [navigate]);
+  }, [navigate, showToast]);
 
   const isLoggedIn = hasSession();
 
   async function handleLogout() {
     try {
       await logout();
+      showToast({ kind: 'success', message: 'You are logged out.' });
       navigate('/login');
     } catch {
-      alert('Logout failed. Please try again.');
+      showToast({ kind: 'error', message: 'Logout failed. Please try again.' });
     }
   }
 

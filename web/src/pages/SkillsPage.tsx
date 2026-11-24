@@ -6,7 +6,9 @@ import PageHeader from '../components/PageHeader';
 import FilterBar from '../components/filters/FilterBar';
 import SearchField from '../components/filters/SearchField';
 import SortMenu from '../components/filters/SortMenu';
+import { useToast } from '../hooks/useToast';
 import { useUrlFilters } from '../hooks/useUrlFilters';
+import { getErrorMessage } from '../utils/errorMessage';
 
 import '../styles/Applications.css';
 import '../styles/Skills.css';
@@ -42,6 +44,7 @@ export default function SkillsPage() {
   // The skill the user is being asked to confirm removing, if any.
   const [skillToDelete, setSkillToDelete] = useState<Skill | null>(null);
   const url = useUrlFilters(URL_DEFAULTS);
+  const { showToast } = useToast();
   const sortBy: SortOption = url.values.sort === 'za' ? 'za' : 'az';
 
   // The skills list is small and already loaded, so search and sort happen here.
@@ -62,7 +65,7 @@ export default function SkillsPage() {
       })
       .catch((error) => {
         if (!ignore) {
-          setError(error instanceof Error ? error.message : 'Something went wrong');
+          setError(getErrorMessage(error));
         }
       })
       .finally(() => {
@@ -90,8 +93,9 @@ export default function SkillsPage() {
       const skill = await addSkill(name.trim());
       setSkills((current) => sortByName([...current, skill]));
       closeModal();
+      showToast({ kind: 'success', message: `"${skill.name}" added to your skills.` });
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : 'Something went wrong');
+      setFormError(getErrorMessage(error));
     } finally {
       setSaving(false);
     }
@@ -108,6 +112,18 @@ export default function SkillsPage() {
     await deleteSkill(skill.id);
     setSkills((current) => current.filter((item) => item.id !== skill.id));
     setSkillToDelete(null);
+    showToast({ kind: 'success', message: `"${skill.name}" removed from your skills.` });
+  }
+
+  function handleSort(value: SortOption) {
+    url.update({ sort: value });
+    const label = SORT_OPTIONS.find((option) => option.value === value)?.label ?? value;
+    showToast({ id: 'sort', kind: 'info', message: `Sorted by ${label}.` });
+  }
+
+  function handleClearFilters() {
+    url.clear(['search']);
+    showToast({ id: 'filters', kind: 'info', message: 'Filters cleared.' });
   }
 
   return (
@@ -187,15 +203,8 @@ export default function SkillsPage() {
 
       {skills.length > 0 && (
         <div className="skills-filters">
-          <FilterBar
-            activeCount={url.countActive(['search'])}
-            onClear={() => url.clear(['search'])}
-          >
-            <SortMenu
-              options={SORT_OPTIONS}
-              value={sortBy}
-              onChange={(value) => url.update({ sort: value })}
-            />
+          <FilterBar activeCount={url.countActive(['search'])} onClear={handleClearFilters}>
+            <SortMenu options={SORT_OPTIONS} value={sortBy} onChange={handleSort} />
             <SearchField
               value={url.values.search}
               onChange={(value) => url.update({ search: value })}

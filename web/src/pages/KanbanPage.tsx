@@ -16,7 +16,10 @@ import Modal from '../components/Modal';
 import FilterBar from '../components/filters/FilterBar';
 import SortMenu from '../components/filters/SortMenu';
 import KanbanColumn from '../components/kanban/KanbanColumn';
+import { useBoardUpdates } from '../hooks/useBoardUpdates';
+import { useToast } from '../hooks/useToast';
 import { useUrlFilters } from '../hooks/useUrlFilters';
+import { getErrorMessage } from '../utils/errorMessage';
 import '../styles/KanbanPage.css';
 
 // The orders the Sort menu offers. The sorting happens here, on the cards already loaded.
@@ -71,11 +74,11 @@ export default function KanbanPage() {
   const [applications, setApplications] = useState<ApplicationSummary[]>([]);
   const [activeStage, setActiveStage] = useState(0);
   const [adding, setAdding] = useState(false);
-  const [message, setMessage] = useState('');
   const [loadError, setLoadError] = useState('');
   // Changes after each save, to load the board again.
   const [reloads, setReloads] = useState(0);
   const boardRef = useRef<HTMLDivElement>(null);
+  const { showToast } = useToast();
 
   const url = useUrlFilters(URL_DEFAULTS);
   const { search, stage: stageParam, dateField, from, to, sort } = url.values;
@@ -95,20 +98,28 @@ export default function KanbanPage() {
   // The filters as one string, so the effect below runs only when one of them really changes.
   const filterKey = JSON.stringify(filters);
 
+  // Tells the user when the applications changed somewhere else (issue #11).
+  const { markLocalChange, clearNotice } = useBoardUpdates(filters, applications, () =>
+    setReloads((value) => value + 1),
+  );
+
   // Loads the cards that match the filters.
   useEffect(() => {
     let ignore = false;
+    // A check for updates that started before this load would compare against old cards.
+    markLocalChange();
 
     searchApplications(JSON.parse(filterKey) as ApplicationFilterValues)
       .then((result) => {
         if (!ignore) {
           setApplications(result);
           setLoadError('');
+          clearNotice();
         }
       })
       .catch((error) => {
         if (!ignore) {
-          setLoadError(error instanceof Error ? error.message : 'Something went wrong');
+          setLoadError(getErrorMessage(error));
         }
       });
 
@@ -116,13 +127,14 @@ export default function KanbanPage() {
     return () => {
       ignore = true;
     };
-  }, [filterKey, reloads]);
+  }, [filterKey, reloads, markLocalChange, clearNotice]);
 
   const sorted = sortApplications(applications, sortBy);
 
   function handleCreated() {
     setAdding(false);
-    setMessage('Application saved.');
+    markLocalChange();
+    showToast({ kind: 'success', message: 'Application saved.' });
     setReloads((value) => value + 1);
   }
 
@@ -131,8 +143,7 @@ export default function KanbanPage() {
 
     if (!application || !STAGES.includes(newStage) || application.stage === newStage) return;
 
-    setMessage('');
-    setLoadError('');
+    markLocalChange();
 
     try {
       setApplications((current) =>
@@ -142,15 +153,27 @@ export default function KanbanPage() {
       const updated = await changeApplicationStage(id, newStage);
 
       setApplications((current) => current.map((app) => (app.id === id ? updated : app)));
+      showToast({
+        kind: 'success',
+        message: `"${application.title}" moved to ${stageLabel(newStage)}.`,
+      });
     } catch (error) {
       setApplications((current) =>
         current.map((app) => (app.id === id ? { ...app, stage: application.stage } : app)),
       );
-
-      if (error instanceof Error) {
-        setLoadError(error.message);
-      }
+      showToast({ kind: 'error', message: getErrorMessage(error) });
     }
+  }
+
+  function handleSort(value: SortOption) {
+    url.update({ sort: value });
+    const label = SORT_OPTIONS.find((option) => option.value === value)?.label ?? value;
+    showToast({ id: 'sort', kind: 'info', message: `Sorted by ${label}.` });
+  }
+
+  function handleClearFilters() {
+    url.clear([...FILTER_KEYS]);
+    showToast({ id: 'filters', kind: 'info', message: 'Filters cleared.' });
   }
 
   function handleDragEnd(event: DragEndEvent) {
@@ -212,10 +235,7 @@ export default function KanbanPage() {
             <button
               className="kanban-add-button"
               type="button"
-              onClick={() => {
-                setMessage('');
-                setAdding(true);
-              }}
+              onClick={() => setAdding(true)}
               disabled={adding}
             >
               + Add application
@@ -224,22 +244,13 @@ export default function KanbanPage() {
         </div>
 
         <div className="kanban-filters">
-          <FilterBar activeCount={activeFilters} onClear={() => url.clear([...FILTER_KEYS])}>
+          <FilterBar activeCount={activeFilters} onClear={handleClearFilters}>
             {/* Order, right-aligned: Sort, Filter, Stage, Search. */}
-            <SortMenu
-              options={SORT_OPTIONS}
-              value={sortBy}
-              onChange={(value) => url.update({ sort: value })}
-            />
+            <SortMenu options={SORT_OPTIONS} value={sortBy} onChange={handleSort} />
             <ApplicationFilters values={filters} onChange={url.update} />
           </FilterBar>
         </div>
 
-        {message && (
-          <p className="kanban-status" role="status">
-            {message}
-          </p>
-        )}
         {loadError && (
           <p className="kanban-status kanban-status-error" role="alert">
             {loadError}

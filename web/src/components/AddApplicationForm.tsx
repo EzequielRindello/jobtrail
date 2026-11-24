@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createApplication } from '../api/applicationsApi';
 import { STAGES, type ApplicationStage } from '../api/applicationTypes';
+import { getErrorMessage } from '../utils/errorMessage';
 
 import '../styles/Applications.css';
 
@@ -45,7 +46,7 @@ export default function AddApplicationForm({ onCreated, onCancel }: AddApplicati
       });
       onCreated();
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Something went wrong');
+      setError(getErrorMessage(error));
     } finally {
       setSaving(false);
     }
