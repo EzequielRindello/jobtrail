@@ -46,6 +46,29 @@ public class ApplicationService
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<DuplicateApplicationResponse>> FindDuplicatesAsync(Guid userId, FindDuplicatesRequest rq, CancellationToken cancellationToken)
+    {
+        // Used by the extension before saving: the same link, or the same title and company
+        // (the same job found on another site), ignoring case. Exact link matches come first.
+        var url = Clean(rq.Url);
+        var title = Clean(rq.Title)?.ToLower();
+        var company = Clean(rq.Company)?.ToLower();
+        if (url is null && (title is null || company is null))
+        {
+            return [];
+        }
+
+        var matches = await _db.Applications
+            .Where(a => a.UserId == userId
+                && ((url != null && a.Url == url)
+                    || (title != null && company != null && a.Title.ToLower() == title && a.Company.ToLower() == company)))
+            .OrderByDescending(a => a.CreatedAt)
+            .Select(a => new DuplicateApplicationResponse(a.Id, a.Title, a.Company, a.Stage, url != null && a.Url == url))
+            .ToListAsync(cancellationToken);
+
+        return [.. matches.OrderByDescending(m => m.SameLink)];
+    }
+
     public async Task<ApplicationResponse> GetAsync(Guid userId, Guid applicationId, CancellationToken cancellationToken)
     {
         var application = await _db.Applications

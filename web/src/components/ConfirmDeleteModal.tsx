@@ -49,20 +49,20 @@ export default function ConfirmDeleteModal({
         <div className="applications-form-actions">
           <button
             type="button"
-            className="applications-danger"
-            onClick={handleConfirm}
-            disabled={busy}
-          >
-            {busy ? 'Deleting...' : confirmLabel}
-          </button>
-          <button
-            type="button"
             className="applications-secondary"
             onClick={onCancel}
             disabled={busy}
             autoFocus
           >
             Cancel
+          </button>
+          <button
+            type="button"
+            className="applications-danger"
+            onClick={handleConfirm}
+            disabled={busy}
+          >
+            {busy ? 'Deleting...' : confirmLabel}
           </button>
         </div>
       </div>

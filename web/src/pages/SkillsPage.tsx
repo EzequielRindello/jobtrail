@@ -134,7 +134,12 @@ export default function SkillsPage() {
             <h2>Add skill</h2>
 
             <div className="applications-field">
-              <label htmlFor="skill-name">Skill *</label>
+              <label htmlFor="skill-name">
+                Skill{' '}
+                <span className="required-mark" aria-hidden="true">
+                  *
+                </span>
+              </label>
               <input
                 id="skill-name"
                 type="text"
@@ -153,11 +158,11 @@ export default function SkillsPage() {
             )}
 
             <div className="applications-form-actions">
-              <button type="submit" className="applications-primary" disabled={saving}>
-                {saving ? 'Saving...' : 'Save skill'}
-              </button>
               <button type="button" className="applications-secondary" onClick={closeModal}>
                 Cancel
+              </button>
+              <button type="submit" className="applications-primary" disabled={saving}>
+                {saving ? 'Saving...' : 'Save skill'}
               </button>
             </div>
           </form>

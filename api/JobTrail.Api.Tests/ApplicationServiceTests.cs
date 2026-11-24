@@ -86,6 +86,31 @@ public class ApplicationServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task FindDuplicates_MatchesTheLinkOrTheTitleAndCompanyOfMyApplications()
+    {
+        await applicationService.CreateAsync(Me, new CreateApplicationRequest { Title = "Backend Developer", Company = "Fictional Labs", Url = "https://other.example.com/9" }, CancellationToken.None);
+        await applicationService.CreateAsync(Me, new CreateApplicationRequest { Title = "Data Analyst", Company = "Beta Fictional", Url = "https://jobs.example.com/1" }, CancellationToken.None);
+        await applicationService.CreateAsync(Me, new CreateApplicationRequest { Title = "Designer", Company = "Fictional Labs" }, CancellationToken.None);
+        await applicationService.CreateAsync(SomeoneElse, new CreateApplicationRequest { Title = "Backend Developer", Company = "Fictional Labs", Url = "https://jobs.example.com/1" }, CancellationToken.None);
+
+        var rq = new FindDuplicatesRequest { Url = " https://jobs.example.com/1 ", Title = "backend developer", Company = "FICTIONAL LABS" };
+        var results = await applicationService.FindDuplicatesAsync(Me, rq, CancellationToken.None);
+
+        Assert.Equal(["Data Analyst", "Backend Developer"], results.Select(r => r.Title));
+        Assert.Equal([true, false], results.Select(r => r.SameLink));
+    }
+
+    [Fact]
+    public async Task FindDuplicates_ReturnsNothingWithoutALinkOrATitleAndCompany()
+    {
+        await applicationService.CreateAsync(Me, new CreateApplicationRequest { Title = "Backend Developer", Company = "Fictional Labs" }, CancellationToken.None);
+
+        var results = await applicationService.FindDuplicatesAsync(Me, new FindDuplicatesRequest { Title = "Backend Developer" }, CancellationToken.None);
+
+        Assert.Empty(results);
+    }
+
+    [Fact]
     public async Task Search_ReturnsOnlyMyApplicationsNewestFirst()
     {
         await CreateAsync(Me, "First", "Alpha Fictional");

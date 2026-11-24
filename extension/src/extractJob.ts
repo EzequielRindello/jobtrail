@@ -42,9 +42,13 @@ export function extractJob(
   const postingUrl = text(posting.url);
 
   return {
-    title: limit(text(posting.title) ?? text(posting.name), LIMITS.title) ?? '',
-    company: limit(readCompany(posting.hiringOrganization), LIMITS.company) ?? '',
-    location: limit(readLocation(posting), LIMITS.location),
+    title: limit(decodeEntities(text(posting.title) ?? text(posting.name)), LIMITS.title) ?? '',
+    company:
+      limit(
+        decodeEntities(readCompany(posting.hiringOrganization)) ?? companyFromUrl(pageUrl),
+        LIMITS.company,
+      ) ?? '',
+    location: limit(decodeEntities(readLocation(posting)), LIMITS.location),
     url: limit(postingUrl && isHttpUrl(postingUrl) ? postingUrl : pageUrl, LIMITS.url),
     description: limit(description ? htmlToText(description) : undefined, LIMITS.description),
     salaryRange: limit(readSalary(posting.baseSalary), LIMITS.salaryRange),
@@ -80,6 +84,19 @@ function isJobPosting(item: Json): boolean {
 function readCompany(value: unknown): string | undefined {
   const first = toArray(value)[0];
   return isObject(first) ? text(first.name) : text(first);
+}
+
+// Workday career sites live at <company>.wd5.myworkdayjobs.com, and some of them send an
+// empty company name, so the subdomain is the best guess left ("adobe" -> "Adobe").
+function companyFromUrl(pageUrl: string): string | undefined {
+  let host: string;
+  try {
+    host = new URL(pageUrl).hostname;
+  } catch {
+    return undefined;
+  }
+  const match = /^([a-z0-9-]+)\.wd\d+\.myworkdayjobs\.com$/i.exec(host);
+  return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1) : undefined;
 }
 
 // One place or several, each a text or a PostalAddress. Remote jobs say so in jobLocationType.
@@ -142,6 +159,28 @@ function text(value: unknown): string | undefined {
   }
   const trimmed = String(value).trim();
   return trimmed === '' ? undefined : trimmed;
+}
+
+// Some sites (Workday) escape the short fields as if they were HTML: "Sales &amp; Marketing".
+// Only the common entities appear there, so they are replaced here to keep this file DOM-free.
+const ENTITIES: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+};
+
+function decodeEntities(value: string | undefined): string | undefined {
+  return value?.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (entity, code: string) => {
+    if (code.startsWith('#')) {
+      const point =
+        code[1].toLowerCase() === 'x' ? parseInt(code.slice(2), 16) : Number(code.slice(1));
+      return Number.isFinite(point) ? String.fromCodePoint(point) : entity;
+    }
+    return ENTITIES[code.toLowerCase()] ?? entity;
+  });
 }
 
 function number(value: unknown): number | undefined {

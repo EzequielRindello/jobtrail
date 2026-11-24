@@ -196,6 +196,11 @@
   font-weight: 600;
 }
 
+/* The * of required fields, in the error color so it stands out from the label. */
+.required-mark {
+  color: var(--jt-error);
+}
+
 .applications-field input,
 .applications-field select,
 .applications-field textarea {
@@ -249,8 +254,10 @@
   box-shadow: 0 0 0 3px rgba(116, 64, 170, 0.1);
 }
 
+/* Modal buttons sit on the right, always Cancel first and the action last. */
 .applications-form-actions {
   display: flex;
+  justify-content: flex-end;
   gap: 12px;
 }
 

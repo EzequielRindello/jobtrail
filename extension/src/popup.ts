@@ -2,7 +2,14 @@
 // 1. Sign in, when there is no saved session.
 // 2. The job found on the current tab, in a form to check and fix before saving it.
 
-import { ApiError, createApplication, login, logout } from './api';
+import {
+  ApiError,
+  createApplication,
+  findDuplicates,
+  login,
+  logout,
+  type DuplicateApplication,
+} from './api';
 import { WEB_URL } from './config';
 import { extractJob, type ExtractedJob } from './extractJob';
 import {
@@ -20,6 +27,7 @@ function element<T extends HTMLElement>(id: string): T {
 }
 
 const loading = element('loading');
+const userGreeting = element('user-greeting');
 const userName = element('user-name');
 const logoutButton = element<HTMLButtonElement>('logout-button');
 
@@ -34,6 +42,8 @@ const jobMessage = element('job-message');
 const manualButton = element<HTMLButtonElement>('manual-button');
 const jobForm = element<HTMLFormElement>('job-form');
 const saveButton = element<HTMLButtonElement>('save-button');
+const duplicateWarning = element('duplicate-warning');
+const proceedButton = element<HTMLButtonElement>('proceed-button');
 const jobError = element('job-error');
 const boardLink = element<HTMLAnchorElement>('board-link');
 
@@ -57,7 +67,7 @@ function showLogin(): void {
   session = null;
   show(loading, false);
   show(jobView, false);
-  show(userName, false);
+  show(userGreeting, false);
   show(logoutButton, false);
   show(loginView, true);
   emailInput.focus();
@@ -91,6 +101,18 @@ logoutButton.addEventListener('click', async () => {
   }
 });
 
+// Names can be up to 50 characters, more than the header fits. CSS cuts the name with an
+// ellipsis; only then the tooltip (data-full-name, drawn by popup.css) shows it whole.
+function showUserName(displayName: string): void {
+  userName.textContent = displayName;
+  show(userGreeting, true);
+  if (userName.scrollWidth > userName.clientWidth) {
+    userGreeting.dataset.fullName = displayName;
+  } else {
+    delete userGreeting.dataset.fullName;
+  }
+}
+
 // ---------- The job on the current tab ----------
 
 async function showJob(): Promise<void> {
@@ -101,8 +123,7 @@ async function showJob(): Promise<void> {
 
   show(loading, false);
   show(loginView, false);
-  userName.textContent = session.user.displayName;
-  show(userName, true);
+  showUserName(session.user.displayName);
   show(logoutButton, true);
   show(jobView, true);
   show(jobForm, false);
@@ -122,7 +143,50 @@ async function showJob(): Promise<void> {
 
   showForm(fromJob(job));
   show(jobMessage, false);
+
+  const duplicate = await findDuplicate(job);
+  if (duplicate) {
+    showDuplicateWarning(duplicate);
+  }
 }
+
+// The application already on the board that looks like this job, or null. Same-link
+// matches come first from the API. A failed check is ignored: it is only a hint.
+async function findDuplicate(job: ExtractedJob): Promise<DuplicateApplication | null> {
+  if (!session) {
+    return null;
+  }
+  try {
+    const [first] = await findDuplicates(job, session.token);
+    return first ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// Shows only the warning, with the form hidden behind "Save anyway": the same job is often
+// opened twice, but it can also be a different post (a re-listing, the same title elsewhere).
+function showDuplicateWarning(duplicate: DuplicateApplication): void {
+  const stage = duplicate.stage.charAt(0).toUpperCase() + duplicate.stage.slice(1);
+  duplicateWarning.textContent = duplicate.sameLink
+    ? `You already saved this job. It is on your board in ${stage}. If you think this is a different job, check the details and save it anyway.`
+    : `This looks like a job you already saved: "${duplicate.title}" at ${duplicate.company}, in ${stage}. If it is a different job, check the details and save it anyway.`;
+
+  show(jobForm, false);
+  show(duplicateWarning, true);
+  show(proceedButton, true);
+  // TODO(#32): link to the details of the saved application once that page exists.
+  boardLink.href = `${WEB_URL}/kanban`;
+  show(boardLink, true);
+}
+
+proceedButton.addEventListener('click', () => {
+  show(duplicateWarning, false);
+  show(proceedButton, false);
+  show(boardLink, false);
+  show(jobForm, true);
+  element('job-title').focus();
+});
 
 manualButton.addEventListener('click', () => {
   show(jobMessage, false);
@@ -138,6 +202,8 @@ function showForm(values: JobFormValues): void {
     element<HTMLInputElement | HTMLTextAreaElement>(`job-${field}`).value = values[field];
   }
   showFieldErrors({});
+  show(duplicateWarning, false);
+  show(proceedButton, false);
   saveButton.disabled = false;
   show(jobForm, true);
 }
@@ -211,7 +277,7 @@ jobForm.addEventListener('submit', async (event) => {
     show(jobForm, false);
     jobMessage.textContent = `Saved "${job.title}" to your board.`;
     show(jobMessage, true);
-    boardLink.href = `${WEB_URL}/dashboard`;
+    boardLink.href = `${WEB_URL}/kanban`;
     show(boardLink, true);
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {

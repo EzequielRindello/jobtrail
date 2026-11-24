@@ -65,6 +65,36 @@ export interface CreatedApplication {
   company: string;
 }
 
+// An application already on the board that looks like the job on the page.
+// sameLink: saved from the same link (the API rejects saving it again); otherwise the
+// title and the company match, so it may be the same job found on another site.
+export interface DuplicateApplication {
+  id: string;
+  title: string;
+  company: string;
+  stage: string;
+  sameLink: boolean;
+}
+
+export function findDuplicates(job: ExtractedJob, token: string): Promise<DuplicateApplication[]> {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries({
+    url: job.url,
+    title: job.title,
+    company: job.company,
+  })) {
+    if (value) {
+      query.set(key, value);
+    }
+  }
+  return request<DuplicateApplication[]>(
+    'GET',
+    `/api/applications/duplicates?${query}`,
+    undefined,
+    token,
+  );
+}
+
 export function createApplication(job: ExtractedJob, token: string): Promise<CreatedApplication> {
   return request<CreatedApplication>(
     'POST',

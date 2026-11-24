@@ -78,6 +78,28 @@ describe('extractJob', () => {
     );
   });
 
+  it('decodes HTML entities in the title and the company (Workday sends them escaped)', () => {
+    const job = extract({
+      ...basicPosting,
+      title: 'Sales &amp; Marketing &#8211; Lead',
+      hiringOrganization: 'Smith &#x26; Co',
+    });
+    expect(job?.title).toBe('Sales & Marketing – Lead');
+    expect(job?.company).toBe('Smith & Co');
+  });
+
+  it('takes the company from a Workday address when the posting sends it empty', () => {
+    const posting = { ...basicPosting, hiringOrganization: { '@type': 'Organization', name: '' } };
+    const workday = extractJob(
+      [JSON.stringify(posting)],
+      'https://adobe.wd5.myworkdayjobs.com/en-US/external/job/R1',
+      stripTags,
+    );
+
+    expect(workday?.company).toBe('Adobe');
+    expect(extract(posting)?.company).toBe('');
+  });
+
   it('accepts the company as plain text', () => {
     expect(extract({ ...basicPosting, hiringOrganization: 'Example Co' })?.company).toBe(
       'Example Co',
