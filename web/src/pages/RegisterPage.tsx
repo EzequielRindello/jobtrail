@@ -36,8 +36,8 @@ export default function RegisterPage() {
 
     try {
       const result = await register({ displayName, email, password });
-      setToken(result.token);
-      navigate('/kanban');
+      setToken(result.token, result.expiresAt);
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Something went wrong');
     }

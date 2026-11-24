@@ -1,12 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+import AppLayout from './components/AppLayout';
+import ProtectedRoute from './components/ProtectedRoute';
+import GuestRoute from './components/GuestRoute';
+
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import SkillsPage from './pages/SkillsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import NotFoundPage from './pages/NotFoundPage';
-import AppLayout from './components/AppLayout';
 import KanbanPage from './pages/KanbanPage';
+import PolicyPage from './pages/PolicyPage';
 
 function App() {
   return (
@@ -14,12 +19,20 @@ function App() {
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/skills" element={<SkillsPage />} />
-          <Route path="/kanban" element={<KanbanPage />} />
+
+          <Route element={<GuestRoute />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+          </Route>
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/skills" element={<SkillsPage />} />
+            <Route path="/kanban" element={<KanbanPage />} />
+          </Route>
+
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/policy" element={<PolicyPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

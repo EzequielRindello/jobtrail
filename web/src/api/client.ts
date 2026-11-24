@@ -1,4 +1,5 @@
-import { getToken } from '../utils/authSession';
+import { API_ENDPOINTS, HTTP_STATUS } from './constants';
+import { clearToken, getToken } from '../utils/authSession';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -6,6 +7,12 @@ const API_URL = import.meta.env.VITE_API_BASE_URL || '';
 // (for example the web dev server's HTML page when VITE_API_BASE_URL is missing).
 const SERVER_UNAVAILABLE = 'We could not reach the JobTrail server. Please try again in a moment.';
 const SESSION_EXPIRED = 'Your session has expired. Please log in again.';
+
+let onSessionExpired: (() => void) | undefined;
+
+export function setSessionExpiredHandler(handler: () => void) {
+  onSessionExpired = handler;
+}
 
 // fetch only fails by itself when there is no answer at all (server off, no network).
 async function send(endpoint: string, init: RequestInit): Promise<Response> {
@@ -22,18 +29,19 @@ function isJson(response: Response): boolean {
 
 // Turns a failed answer into a message a user can read: the API's own message when it sent
 // one (validation errors first), otherwise a plain sentence instead of a parser error.
-async function toError(response: Response): Promise<Error> {
+async function toError(response: Response, endpoint: string): Promise<Error> {
+  if (response.status === HTTP_STATUS.UNAUTHORIZED && endpoint !== API_ENDPOINTS.LOGIN) {
+    clearToken();
+    onSessionExpired?.();
+    return new Error(SESSION_EXPIRED);
+  }
+
   if (isJson(response)) {
     const error = await response.json().catch(() => ({}));
     const message = Object.values(error.errors || {}).flat()[0] as string | undefined;
     if (message || error.title) {
       return new Error(message || error.title);
     }
-  }
-
-  // An expired or missing token gets a 401 with no body.
-  if (response.status === 401) {
-    return new Error(SESSION_EXPIRED);
   }
 
   return new Error(SERVER_UNAVAILABLE);
@@ -50,7 +58,7 @@ export async function apiDownload(endpoint: string): Promise<Blob> {
 
   // An HTML page here means the request did not reach the API, so it is not the file.
   if (!response.ok || (response.headers.get('content-type') ?? '').includes('html')) {
-    throw await toError(response);
+    throw await toError(response, endpoint);
   }
 
   return response.blob();
@@ -68,10 +76,10 @@ export async function apiRequest<T = unknown>(
   });
 
   if (!response.ok) {
-    throw await toError(response);
+    throw await toError(response, endpoint);
   }
 
-  if (response.status === 204) {
+  if (response.status === HTTP_STATUS.NO_CONTENT) {
     return null as T;
   }
 

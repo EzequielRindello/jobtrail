@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { login } from '../api/authApi';
 import '../styles/AuthPages.css';
 import { setToken } from '../utils/authSession';
@@ -7,6 +7,10 @@ import { validateEmail } from '../utils/authValidation';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const redirectLocation = location.state?.from;
+
   const [error, setError] = useState('');
 
   async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
@@ -24,8 +28,15 @@ export default function LoginPage() {
 
     try {
       const result = await login({ email, password });
-      setToken(result.token);
-      navigate('/kanban');
+      setToken(result.token, result.expiresAt);
+      navigate(
+        redirectLocation
+          ? `${redirectLocation.pathname}${redirectLocation.search}${redirectLocation.hash}`
+          : '/dashboard',
+        {
+          replace: true,
+        },
+      );
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Something went wrong');
     }

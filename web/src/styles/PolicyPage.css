@@ -1,0 +1,41 @@
+.policy-page {
+  max-width: 900px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.page-header {
+  margin-bottom: 0;
+}
+
+.policy-page .policy-updated {
+  font-size: 12px;
+  margin-top: 0;
+  margin-bottom: 30px;
+  line-height: 0.5;
+}
+
+.policy-page h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 28px 0 5px;
+}
+
+.policy-page p {
+  margin: 0 0 16px;
+}
+
+.policy-page ul {
+  padding-left: 24px;
+  margin: 12px 0 20px;
+}
+
+.policy-page li {
+  margin-bottom: 6px;
+}
+
+@media (max-width: 700px) {
+  .policy-page h2 {
+    font-size: 18px;
+  }
+}
