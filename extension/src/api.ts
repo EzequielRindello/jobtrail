@@ -26,7 +26,11 @@ async function request<T>(
   body?: unknown,
   token?: string,
 ): Promise<T> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  // The device's time zone lets the API date things with the user's today, not the UTC one.
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-Time-Zone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+  };
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }

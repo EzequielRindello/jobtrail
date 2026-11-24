@@ -25,11 +25,13 @@ public class ApplicationService
 
     private readonly AppDbContext _db;
     private readonly TimeProvider _timeProvider;
+    private readonly ClientTimeZone _clientTimeZone;
 
-    public ApplicationService(AppDbContext db, TimeProvider timeProvider)
+    public ApplicationService(AppDbContext db, TimeProvider timeProvider, ClientTimeZone clientTimeZone)
     {
         _db = db;
         _timeProvider = timeProvider;
+        _clientTimeZone = clientTimeZone;
     }
 
     #endregion
@@ -258,7 +260,7 @@ public class ApplicationService
         return query;
     }
 
-    private static string?[] CreateCsvRow(Application application)
+    private string?[] CreateCsvRow(Application application)
     {
         return
         [
@@ -268,7 +270,7 @@ public class ApplicationService
             application.Url,
             application.Stage.ToString(),
             application.AppliedOn?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-            application.CreatedAt.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            _clientTimeZone.ToLocalDate(application.CreatedAt).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             application.SalaryRange,
             application.ContactName,
             application.ContactEmail,
@@ -295,18 +297,18 @@ public class ApplicationService
             : value;
     }
 
-    private static IQueryable<Application> FilterByCreatedAt(IQueryable<Application> query, DateOnly? from, DateOnly? to)
+    private IQueryable<Application> FilterByCreatedAt(IQueryable<Application> query, DateOnly? from, DateOnly? to)
     {
-        // Days are UTC days: "to" includes the whole day, up to the start of the next one.
+        // Days are the user's days: "to" includes the whole day, up to the start of the next one.
         if (from is not null)
         {
-            var start = ToUtcStartOfDay(from.Value);
+            var start = _clientTimeZone.StartOfDay(from.Value);
             query = query.Where(a => a.CreatedAt >= start);
         }
 
         if (to is not null)
         {
-            var end = ToUtcStartOfDay(to.Value.AddDays(1));
+            var end = _clientTimeZone.StartOfDay(to.Value.AddDays(1));
             query = query.Where(a => a.CreatedAt < end);
         }
 
@@ -344,11 +346,12 @@ public class ApplicationService
     }
 
     // Creating it in Applied, or moving it there, dates the application if the user did not.
-    private static void SetAppliedOnIfApplied(Application application, DateTimeOffset now)
+    // The date is the user's today, not the UTC one.
+    private void SetAppliedOnIfApplied(Application application, DateTimeOffset now)
     {
         if (application.Stage == ApplicationStage.Applied && application.AppliedOn is null)
         {
-            application.AppliedOn = DateOnly.FromDateTime(now.UtcDateTime);
+            application.AppliedOn = _clientTimeZone.ToLocalDate(now);
         }
     }
 
@@ -421,11 +424,6 @@ public class ApplicationService
         return email.Length <= ApplicationLimits.ContactEmail
             && MailAddress.TryCreate(email, out var address)
             && address.Address == email;
-    }
-
-    private static DateTimeOffset ToUtcStartOfDay(DateOnly day)
-    {
-        return new DateTimeOffset(day.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
     }
 
     private static ApiException NotFoundException()

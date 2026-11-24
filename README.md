@@ -189,7 +189,8 @@ All endpoints are documented in Swagger.
 
 A skill name is up to 50 characters, and two names that differ only in upper or lower case count as the same skill.
 
-- **Filters:** `GET /api/applications` takes these, all optional: `search` (company or job title, any case), `stage`, `from` and `to` (`YYYY-MM-DD`, both days included), and `dateField` (`saved`, the default, or `applied`) to choose which date `from`/`to` filter by. Days are UTC days.
+- **Filters:** `GET /api/applications` takes these, all optional: `search` (company or job title, any case), `stage`, `from` and `to` (`YYYY-MM-DD`, both days included), and `dateField` (`saved`, the default, or `applied`) to choose which date `from`/`to` filter by.
+- **Time zone:** the web app and the extension send the device's time zone on every request as `X-Time-Zone` (an IANA name such as `America/Argentina/Buenos_Aires`). The API uses it to decide which day it is: the automatic `appliedOn`, the `saved` `from`/`to` filters and the "Saved on" column of the CSV. Without the header, or with a name it does not know, days are UTC days (so in Argentina after 21:00 "today" would already be tomorrow).
 
 Send the token on every protected request as `Authorization: Bearer <token>`. Tokens last 7 days. Errors use the standard [ProblemDetails](https://www.rfc-editor.org/rfc/rfc9457) JSON format, and validation errors (`400`) list the problem for each field under `errors`.
 

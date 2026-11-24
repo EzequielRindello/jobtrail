@@ -58,6 +58,15 @@ describe('logout', () => {
     expect(url).toMatch(/\/api\/auth\/logout$/);
     expect(init.headers.Authorization).toBe('Bearer my-token');
   });
+
+  it("sends the device's time zone so the API uses the user's day", async () => {
+    fetchMock.mockResolvedValue(jsonResponse(204));
+
+    await logout('my-token');
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init.headers['X-Time-Zone']).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  });
 });
 
 describe('findDuplicates', () => {

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using JobTrail.Api.Contracts.Applications;
 using JobTrail.Api.Data;
@@ -12,17 +13,24 @@ namespace JobTrail.Api.Tests;
 
 public class ApplicationServiceTests : IDisposable
 {
+    private const string Argentina = "America/Argentina/Buenos_Aires";
+
     private static readonly Guid Me = Guid.NewGuid();
     private static readonly Guid SomeoneElse = Guid.NewGuid();
     private static readonly DateOnly Today = DateOnly.FromDateTime(TestHelpers.Now.UtcDateTime);
 
+    // 22:00 on Nov 10 in Buenos Aires (UTC-3) is already Nov 11 in UTC.
+    private static readonly DateTimeOffset LateAtNightInArgentina = new(2026, 11, 11, 1, 0, 0, TimeSpan.Zero);
+    private static readonly DateOnly ArgentinaDay = new(2026, 11, 10);
+    private static readonly DateOnly UtcDay = new(2026, 11, 11);
+
     private readonly AppDbContext db = TestHelpers.CreateDbContext();
     private readonly FakeTimeProvider clock = TestHelpers.CreateClock();
-    private readonly ApplicationService applicationService;
+    private ApplicationService applicationService;
 
     public ApplicationServiceTests()
     {
-        applicationService = new ApplicationService(db, clock);
+        applicationService = CreateService(null);
     }
 
     public void Dispose()
@@ -316,6 +324,71 @@ public class ApplicationServiceTests : IDisposable
         var bytes = await applicationService.ExportAsync(Me, new SearchApplicationsRequest(), CancellationToken.None);
 
         Assert.Equal([0xEF, 0xBB, 0xBF], bytes[..3]);
+    }
+
+    [Theory]
+    [InlineData(Argentina, "2026-11-10")]
+    [InlineData(null, "2026-11-11")]
+    [InlineData("Not/AZone", "2026-11-11")]
+    public async Task Create_InAppliedLateAtNight_UsesTheClientsDay(string? timeZone, string expected)
+    {
+        applicationService = CreateService(timeZone);
+        clock.SetUtcNow(LateAtNightInArgentina);
+
+        var response = await CreateAsync(Me, "QA Engineer", "Example Co", ApplicationStage.Applied);
+
+        Assert.Equal(DateOnly.Parse(expected, CultureInfo.InvariantCulture), response.AppliedOn);
+    }
+
+    [Fact]
+    public async Task ChangeStage_ToAppliedLateAtNight_UsesTheClientsDay()
+    {
+        applicationService = CreateService(Argentina);
+        clock.SetUtcNow(LateAtNightInArgentina);
+        var created = await CreateAsync(Me, "Backend Developer", "Fictional Labs");
+
+        var response = await applicationService.ChangeStageAsync(Me, created.Id, new ChangeStageRequest { Stage = ApplicationStage.Applied }, CancellationToken.None);
+
+        Assert.Equal(ArgentinaDay, response.AppliedOn);
+    }
+
+    [Fact]
+    public async Task Search_BySavedDateLateAtNight_UsesTheClientsDay()
+    {
+        applicationService = CreateService(Argentina);
+        clock.SetUtcNow(LateAtNightInArgentina);
+        await CreateAsync(Me, "Saved at night", "Example Co");
+
+        var sameDay = await applicationService.SearchAsync(Me, new SearchApplicationsRequest { From = ArgentinaDay, To = ArgentinaDay }, CancellationToken.None);
+        var nextDay = await applicationService.SearchAsync(Me, new SearchApplicationsRequest { From = UtcDay, To = UtcDay }, CancellationToken.None);
+
+        Assert.Equal("Saved at night", Assert.Single(sameDay).Title);
+        Assert.Empty(nextDay);
+    }
+
+    [Fact]
+    public async Task Export_SavedOnLateAtNight_UsesTheClientsDay()
+    {
+        applicationService = CreateService(Argentina);
+        clock.SetUtcNow(LateAtNightInArgentina);
+        await CreateAsync(Me, "Saved at night", "Example Co");
+
+        var lines = ReadCsv(await applicationService.ExportAsync(Me, new SearchApplicationsRequest(), CancellationToken.None));
+
+        Assert.Equal("2026-11-10", lines[1].Split(',')[6]);
+    }
+
+    // A service as it runs for one request, with the X-Time-Zone header the client sent (null = no header).
+    private ApplicationService CreateService(string? timeZone)
+    {
+        var context = new DefaultHttpContext();
+        if (timeZone is not null)
+        {
+            context.Request.Headers[ClientTimeZone.HeaderName] = timeZone;
+        }
+
+        var clientTimeZone = new ClientTimeZone(new HttpContextAccessor { HttpContext = context });
+        return new ApplicationService(db, clock, clientTimeZone);
     }
 
     private static string[] ReadCsv(byte[] bytes)
