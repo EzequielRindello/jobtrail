@@ -19,6 +19,8 @@
   --jt-error: #b42342;
   --jt-success: #1f7a4d;
   --jt-focus: #bca4e0;
+  /* Soft glow around a focused input (used as a 3px box-shadow). */
+  --jt-focus-glow: rgba(116, 64, 170, 0.1);
   /* Text on a solid background of that color (all pass WCAG AA, 4.5:1 or more, with white). */
   --jt-on-primary: #fff;
   --jt-on-success: #fff;

@@ -24,7 +24,21 @@
 .filter-control:focus {
   outline: none;
   border-color: var(--jt-primary);
-  box-shadow: 0 0 0 3px rgba(116, 64, 170, 0.1);
+  box-shadow: 0 0 0 3px var(--jt-focus-glow);
+}
+
+/* Same autofill fix as the forms in Applications.css (the search box can be autofilled too). */
+.filter-control:-webkit-autofill,
+.filter-control:-webkit-autofill:hover {
+  -webkit-text-fill-color: var(--jt-text);
+  caret-color: var(--jt-text);
+  box-shadow: 0 0 0 1000px var(--bg) inset;
+}
+
+.filter-control:-webkit-autofill:focus {
+  box-shadow:
+    0 0 0 1000px var(--bg) inset,
+    0 0 0 3px var(--jt-focus-glow);
 }
 
 /* Same chevron as the selects in the forms (Applications.css), a bit smaller. */
@@ -139,7 +153,7 @@ select.filter-control {
 .dropdown-toggle:focus-visible,
 .filter-clear:focus-visible,
 .dropdown-option:focus-visible {
-  outline: 3px solid #bca4e0;
+  outline: 3px solid var(--jt-focus);
   outline-offset: 2px;
 }
 
