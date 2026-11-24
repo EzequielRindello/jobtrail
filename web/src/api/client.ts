@@ -1,3 +1,4 @@
+import { API_ENDPOINTS, HTTP_STATUS } from './constants';
 import { clearToken, getToken } from '../utils/authSession';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || '';
@@ -6,6 +7,12 @@ const API_URL = import.meta.env.VITE_API_BASE_URL || '';
 // (for example the web dev server's HTML page when VITE_API_BASE_URL is missing).
 const SERVER_UNAVAILABLE = 'We could not reach the JobTrail server. Please try again in a moment.';
 const SESSION_EXPIRED = 'Your session has expired. Please log in again.';
+
+let onSessionExpired: (() => void) | undefined;
+
+export function setSessionExpiredHandler(handler: () => void) {
+  onSessionExpired = handler;
+}
 
 // fetch only fails by itself when there is no answer at all (server off, no network).
 async function send(endpoint: string, init: RequestInit): Promise<Response> {
@@ -23,9 +30,9 @@ function isJson(response: Response): boolean {
 // Turns a failed answer into a message a user can read: the API's own message when it sent
 // one (validation errors first), otherwise a plain sentence instead of a parser error.
 async function toError(response: Response, endpoint: string): Promise<Error> {
-  if (response.status === 401 && endpoint !== '/api/auth/login') {
+  if (response.status === HTTP_STATUS.UNAUTHORIZED && endpoint !== API_ENDPOINTS.LOGIN) {
     clearToken();
-    window.location.replace('/login');
+    onSessionExpired?.();
     return new Error(SESSION_EXPIRED);
   }
 
@@ -72,7 +79,7 @@ export async function apiRequest<T = unknown>(
     throw await toError(response, endpoint);
   }
 
-  if (response.status === 204) {
+  if (response.status === HTTP_STATUS.NO_CONTENT) {
     return null as T;
   }
 

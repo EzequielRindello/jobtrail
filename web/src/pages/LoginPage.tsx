@@ -9,7 +9,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const location = useLocation();
-  const from = location.state?.from;
+  const redirectLocation = location.state?.from;
 
   const [error, setError] = useState('');
 
@@ -29,9 +29,14 @@ export default function LoginPage() {
     try {
       const result = await login({ email, password });
       setToken(result.token, result.expiresAt);
-      navigate(from ? `${from.pathname}${from.search}${from.hash}` : '/dashboard', {
-        replace: true,
-      });
+      navigate(
+        redirectLocation
+          ? `${redirectLocation.pathname}${redirectLocation.search}${redirectLocation.hash}`
+          : '/dashboard',
+        {
+          replace: true,
+        },
+      );
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Something went wrong');
     }

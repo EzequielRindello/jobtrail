@@ -1,5 +1,8 @@
+import { useEffect } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+
 import { logout } from '../api/authApi';
+import { setSessionExpiredHandler } from '../api/client';
 import { isLoggedIn as hasSession } from '../utils/authSession';
 
 import '../styles/AppLayout.css';
@@ -7,6 +10,14 @@ import '../styles/AppLayout.css';
 export default function AppLayout() {
   const navigate = useNavigate();
   useLocation();
+
+  useEffect(() => {
+    setSessionExpiredHandler(() => {
+      navigate('/login', { replace: true });
+    });
+
+    return () => setSessionExpiredHandler(() => {});
+  }, [navigate]);
 
   const isLoggedIn = hasSession();
 
