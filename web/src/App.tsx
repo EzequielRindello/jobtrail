@@ -38,9 +38,10 @@ function App() {
 
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/policy" element={<PolicyPage />} />
-          </Route>
 
-          <Route path="*" element={<NotFoundPage />} />
+            {/* Inside the layout, so the 404 page keeps the header and the footer. */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
         </Routes>
       </ToastProvider>
     </BrowserRouter>

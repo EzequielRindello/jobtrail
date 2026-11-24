@@ -49,27 +49,32 @@ export default function AppLayout() {
             <Link to={isLoggedIn ? '/kanban' : '/login'}>JobTrail</Link>
           </h1>
 
-          <nav className="app-nav">
-            <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}>
-              Dashboard
-            </Link>
-            <Link to="/kanban" className={location.pathname === '/kanban' ? 'active' : ''}>
-              Kanban
-            </Link>
-            <Link to="/skills" className={location.pathname === '/skills' ? 'active' : ''}>
-              Skills
-            </Link>
-          </nav>
+          {/* Signed out, the header only has the logo and "Log In": the pages are private. */}
+          {isLoggedIn && (
+            <nav className="app-nav">
+              <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}>
+                Dashboard
+              </Link>
+              <Link to="/kanban" className={location.pathname === '/kanban' ? 'active' : ''}>
+                Kanban
+              </Link>
+              <Link to="/skills" className={location.pathname === '/skills' ? 'active' : ''}>
+                Skills
+              </Link>
+            </nav>
+          )}
         </div>
 
         <div className="header-right">
-          <input
-            className="header-search"
-            type="search"
-            placeholder="Search"
-            aria-label="Search"
-            disabled
-          />
+          {isLoggedIn && (
+            <input
+              className="header-search"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+              disabled
+            />
+          )}
 
           {isLoggedIn ? (
             <button type="button" className="logout-button" onClick={handleLogout}>
@@ -81,11 +86,13 @@ export default function AppLayout() {
             </Link>
           )}
         </div>
-        <nav className="mobile-nav">
-          <Link to="/dashboard">Dashboard</Link>
-          <Link to="/kanban">Kanban</Link>
-          <Link to="/skills">Skills</Link>
-        </nav>
+        {isLoggedIn && (
+          <nav className="mobile-nav">
+            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/kanban">Kanban</Link>
+            <Link to="/skills">Skills</Link>
+          </nav>
+        )}
       </header>
 
       <main className="app-content">
