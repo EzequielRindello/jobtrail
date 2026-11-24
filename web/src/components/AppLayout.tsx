@@ -1,5 +1,8 @@
+import { useEffect } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+
 import { logout } from '../api/authApi';
+import { setSessionExpiredHandler } from '../api/client';
 import { isLoggedIn as hasSession } from '../utils/authSession';
 
 import '../styles/AppLayout.css';
@@ -7,6 +10,14 @@ import '../styles/AppLayout.css';
 export default function AppLayout() {
   const navigate = useNavigate();
   useLocation();
+
+  useEffect(() => {
+    setSessionExpiredHandler(() => {
+      navigate('/login', { replace: true });
+    });
+
+    return () => setSessionExpiredHandler(() => {});
+  }, [navigate]);
 
   const isLoggedIn = hasSession();
 
@@ -38,9 +49,6 @@ export default function AppLayout() {
             <Link to="/skills" className={location.pathname === '/skills' ? 'active' : ''}>
               Skills
             </Link>
-            <Link to="/privacy" className={location.pathname === '/privacy' ? 'active' : ''}>
-              Privacy
-            </Link>
           </nav>
         </div>
 
@@ -67,13 +75,21 @@ export default function AppLayout() {
           <Link to="/dashboard">Dashboard</Link>
           <Link to="/kanban">Kanban</Link>
           <Link to="/skills">Skills</Link>
-          <Link to="/privacy">Privacy</Link>
         </nav>
       </header>
 
       <main className="app-content">
         <Outlet />
       </main>
+
+      <footer className="app-footer">
+        <span>© {new Date().getFullYear()} JobTrail</span>
+
+        <nav className="footer-nav" aria-label="Footer navigation">
+          <Link to="/privacy">Privacy</Link>
+          <Link to="/policy">Policy</Link>
+        </nav>
+      </footer>
     </div>
   );
 }
