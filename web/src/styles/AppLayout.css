@@ -1,6 +1,6 @@
 .app-layout {
   min-height: 100vh;
-  background: white;
+  background: var(--bg);
   display: flex;
   flex-direction: column;
 }
@@ -12,8 +12,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  background: white;
-  border-bottom: 1px solid #ededed;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
 }
 
 .header-left,
@@ -31,7 +31,7 @@
 
 /* The logo is a link, so it keeps the plain logo look instead of the link style. */
 .app-logo a {
-  color: #171717;
+  color: var(--jt-heading);
   text-decoration: none;
 }
 
@@ -40,38 +40,27 @@
   align-items: center;
   gap: 4px;
   padding: 4px;
-  background: #f5f6f8;
+  background: var(--jt-surface);
   border-radius: 8px;
 }
 
 .app-nav a {
   padding: 9px 14px;
   border-radius: 6px;
-  color: #666b75;
+  color: var(--jt-muted);
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
 }
 
 .app-nav a.active {
-  background: white;
-  color: #171717;
+  background: var(--bg);
+  color: var(--jt-heading);
   font-weight: 600;
 }
 
 .header-right {
   gap: 12px;
-}
-
-.header-search {
-  width: 220px;
-  height: 36px;
-  padding: 0 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background: white;
-  font: inherit;
-  font-size: 13px;
 }
 
 .logout-button {
@@ -81,10 +70,10 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 6px;
-  background: white;
-  color: #171717;
+  background: var(--bg);
+  color: var(--jt-heading);
   font: inherit;
   font-size: 13px;
   text-decoration: none;
@@ -92,14 +81,14 @@
 }
 
 .logout-button:hover {
-  background: #f5f6f8;
+  background: var(--jt-surface);
 }
 
 /* Log In is the main action when there is no session, so it uses the primary color. */
 .login-button {
   border-color: var(--jt-primary);
   background: var(--jt-primary);
-  color: #fff;
+  color: var(--bg);
   font-weight: 600;
 }
 
@@ -117,14 +106,14 @@
 }
 
 .mobile-nav a {
-  color: #666b75;
+  color: var(--jt-muted);
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
 }
 
 .mobile-nav a:hover {
-  color: #171717;
+  color: var(--jt-heading);
 }
 
 .app-footer {
@@ -134,8 +123,8 @@
   flex-wrap: wrap;
   gap: 12px;
   padding: 16px 32px;
-  border-top: 1px solid #ededed;
-  color: #666b75;
+  border-top: 1px solid var(--border);
+  color: var(--jt-muted);
   font-size: 13px;
 }
 
@@ -155,8 +144,7 @@
 }
 
 @media (max-width: 700px) {
-  .app-nav,
-  .header-search {
+  .app-nav {
     display: none;
   }
 
@@ -165,19 +153,27 @@
     width: 100%;
     gap: 20px;
     padding: 12px 0;
-    border-top: 1px solid #ededed;
+    border-top: 1px solid var(--border);
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 
   .app-header {
     height: auto;
     min-height: 64px;
     padding: 12px 16px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
   }
 
-  .header-left,
+  .header-left {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
   .header-right {
-    gap: 12px;
+    display: contents;
   }
 
   .app-content {
@@ -186,5 +182,16 @@
 
   .app-footer {
     padding: 16px;
+  }
+
+  .header-right .logout-button {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .header-right .global-search {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
   }
 }
