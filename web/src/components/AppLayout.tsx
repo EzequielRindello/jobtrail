@@ -4,12 +4,13 @@ import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../api/authApi';
 import { setSessionExpiredHandler } from '../api/client';
 import { isLoggedIn as hasSession } from '../utils/authSession';
+import GlobalSearch from './GlobalSearch';
 
 import '../styles/AppLayout.css';
 
 export default function AppLayout() {
   const navigate = useNavigate();
-  useLocation();
+  const location = useLocation();
 
   useEffect(() => {
     setSessionExpiredHandler(() => {
@@ -53,13 +54,7 @@ export default function AppLayout() {
         </div>
 
         <div className="header-right">
-          <input
-            className="header-search"
-            type="search"
-            placeholder="Search"
-            aria-label="Search"
-            disabled
-          />
+          {isLoggedIn && <GlobalSearch key={location.key} />}
 
           {isLoggedIn ? (
             <button type="button" className="logout-button" onClick={handleLogout}>
