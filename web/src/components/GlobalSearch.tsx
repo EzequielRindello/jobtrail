@@ -8,6 +8,9 @@ import SearchField from './filters/SearchField';
 
 import '../styles/GlobalSearch.css';
 
+// The dropdown is a quick jump, not a full list: the board's search shows every match.
+const MAX_RESULTS_PER_GROUP = 5;
+
 export default function GlobalSearch() {
   const [search, setSearch] = useState('');
   const [applications, setApplications] = useState<ApplicationSummary[]>([]);
@@ -16,6 +19,9 @@ export default function GlobalSearch() {
   const [error, setError] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  // A user has few skills, so they are fetched once (on the first search) and filtered here
+  // on every key. Applications can be many, so the API filters those on each search.
+  const allSkills = useRef<Skill[] | null>(null);
 
   useEffect(() => {
     const query = search.trim();
@@ -32,13 +38,18 @@ export default function GlobalSearch() {
         from: '',
         to: '',
       }),
-      getSkills(),
+      allSkills.current ?? getSkills(),
     ])
       .then(([applicationResults, skillResults]) => {
+        allSkills.current = skillResults;
+
         if (!ignore) {
-          setApplications(applicationResults);
+          const term = query.toLowerCase();
+          setApplications(applicationResults.slice(0, MAX_RESULTS_PER_GROUP));
           setSkills(
-            skillResults.filter((skill) => skill.name.toLowerCase().includes(query.toLowerCase())),
+            skillResults
+              .filter((skill) => skill.name.toLowerCase().includes(term))
+              .slice(0, MAX_RESULTS_PER_GROUP),
           );
         }
       })
@@ -86,11 +97,18 @@ export default function GlobalSearch() {
     if (value === search) return;
 
     setSearch(value);
-    setApplications([]);
-    setSkills([]);
     setError('');
     setLoading(value.trim() !== '');
+
+    // The previous results stay on screen while the next search runs, so the list does not
+    // flash empty on every pause in typing. They are only dropped when the box is emptied.
+    if (value.trim() === '') {
+      setApplications([]);
+      setSkills([]);
+    }
   }
+
+  const hasResults = applications.length > 0 || skills.length > 0;
 
   return (
     <div className="global-search" ref={searchRef} onFocus={() => setIsOpen(search.trim() !== '')}>
@@ -103,7 +121,8 @@ export default function GlobalSearch() {
 
       {isOpen && search.trim() !== '' && (
         <div className="global-search-results">
-          {loading && <p role="status">Searching...</p>}
+          {/* Only the first search shows this; later ones keep the previous results visible. */}
+          {loading && !hasResults && <p role="status">Searching...</p>}
 
           {error && (
             <p className="global-search-error" role="alert">
@@ -111,20 +130,17 @@ export default function GlobalSearch() {
             </p>
           )}
 
-          {!loading && !error && applications.length === 0 && skills.length === 0 && (
-            <p>No results found.</p>
-          )}
+          {!loading && !error && !hasResults && <p>No results found.</p>}
 
-          {!loading && !error && applications.length > 0 && (
+          {!error && applications.length > 0 && (
             <section className="global-search-group">
               <h3>Applications</h3>
 
               {applications.map((application) => (
-                // TODO: Navigate directly to the application details page once implemented.
                 <Link
                   key={application.id}
                   className="global-search-result"
-                  to={`/kanban?search=${encodeURIComponent(application.title)}&stage=${application.stage}`}
+                  to={`/applications/${application.id}`}
                   onClick={() => handleSearch('')}
                 >
                   <span>{application.title}</span>
@@ -134,7 +150,7 @@ export default function GlobalSearch() {
             </section>
           )}
 
-          {!loading && !error && skills.length > 0 && (
+          {!error && skills.length > 0 && (
             <section className="global-search-group">
               <h3>Skills</h3>
 
