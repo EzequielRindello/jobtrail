@@ -18,6 +18,8 @@ builder.Services.AddDbContext<AppDbContext>(options => options
     .UseSnakeCaseNamingConvention());
 
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ClientTimeZone>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ApplicationService>();

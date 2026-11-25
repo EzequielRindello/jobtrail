@@ -117,6 +117,29 @@ After changing the code, run `npm run build` again and click the reload button o
 
 The extension reads the job from the [schema.org JobPosting](https://schema.org/JobPosting) data that many job sites publish for search engines. The popup shows what it found in a form, so you can fix any field before saving. On pages without it, the popup says so and offers **Enter it manually**. It talks to the API at `http://localhost:5080`; to point it somewhere else, build with `VITE_API_URL` (and `VITE_WEB_URL` for the board link) and add that URL to `host_permissions` in `extension/public/manifest.json`.
 
+The popup checks your board before saving. If the link is already saved, or another job has the same title and company, it shows only a warning with the stage of the saved one and a **Save anyway** button that opens the form, in case it is a different job.
+
+#### Tested job sites
+
+The extension has no list of sites: it reads any page that publishes `JobPosting` data. These are the sites checked on real posts (November 2026):
+
+| Site                                                 | Result                                                                                                       |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Lever                                                | Works                                                                                                        |
+| Greenhouse (company career pages)                    | Works                                                                                                        |
+| Ashby                                                | Works                                                                                                        |
+| Workable                                             | Works                                                                                                        |
+| Workday                                              | Works (when a company sends an empty name, as Adobe does, it is taken from the site address)                 |
+| Greenhouse (`job-boards.greenhouse.io` hosted pages) | Manual only                                                                                                  |
+| SmartRecruiters                                      | Manual only                                                                                                  |
+| LinkedIn                                             | Manual only                                                                                                  |
+| Indeed                                               | Manual only                                                                                                  |
+| Get on Board                                         | Manual only                                                                                                  |
+| We Work Remotely                                     | Manual only                                                                                                  |
+| Glassdoor                                            | Works on a single job page (`/job-listing/...`). The search page with a job open on the side has no job data |
+
+**Works**: title and company are found. **Needs fix**: the popup opens but a field must be filled by hand. **Manual only**: the page has no job data, so the popup offers **Enter it manually**.
+
 ### Environment variables (deployment)
 
 Locally everything above is enough. On a server, set these instead of user-secrets:
@@ -166,7 +189,8 @@ All endpoints are documented in Swagger.
 
 A skill name is up to 50 characters, and two names that differ only in upper or lower case count as the same skill.
 
-- **Filters:** `GET /api/applications` takes these, all optional: `search` (company or job title, any case), `stage`, `from` and `to` (`YYYY-MM-DD`, both days included), and `dateField` (`saved`, the default, or `applied`) to choose which date `from`/`to` filter by. Days are UTC days.
+- **Filters:** `GET /api/applications` takes these, all optional: `search` (company or job title, any case), `stage`, `from` and `to` (`YYYY-MM-DD`, both days included), and `dateField` (`saved`, the default, or `applied`) to choose which date `from`/`to` filter by.
+- **Time zone:** the web app and the extension send the device's time zone on every request as `X-Time-Zone` (an IANA name such as `America/Argentina/Buenos_Aires`). The API uses it to decide which day it is: the automatic `appliedOn`, the `saved` `from`/`to` filters and the "Saved on" column of the CSV. Without the header, or with a name it does not know, days are UTC days (so in Argentina after 21:00 "today" would already be tomorrow).
 
 Send the token on every protected request as `Authorization: Bearer <token>`. Tokens last 7 days. Errors use the standard [ProblemDetails](https://www.rfc-editor.org/rfc/rfc9457) JSON format, and validation errors (`400`) list the problem for each field under `errors`.
 

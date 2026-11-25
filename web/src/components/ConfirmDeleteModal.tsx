@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getErrorMessage } from '../utils/errorMessage';
 import Modal from './Modal';
 
 import '../styles/Applications.css';
@@ -29,7 +30,7 @@ export default function ConfirmDeleteModal({
     try {
       await onConfirm();
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Something went wrong');
+      setError(getErrorMessage(error));
       setBusy(false);
     }
   }
@@ -49,20 +50,20 @@ export default function ConfirmDeleteModal({
         <div className="applications-form-actions">
           <button
             type="button"
-            className="applications-danger"
-            onClick={handleConfirm}
-            disabled={busy}
-          >
-            {busy ? 'Deleting...' : confirmLabel}
-          </button>
-          <button
-            type="button"
             className="applications-secondary"
             onClick={onCancel}
             disabled={busy}
             autoFocus
           >
             Cancel
+          </button>
+          <button
+            type="button"
+            className="applications-danger"
+            onClick={handleConfirm}
+            disabled={busy}
+          >
+            {busy ? 'Deleting...' : confirmLabel}
           </button>
         </div>
       </div>

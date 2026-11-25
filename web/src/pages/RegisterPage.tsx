@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../api/authApi';
+import { useToast } from '../hooks/useToast';
 import '../styles/AuthPages.css';
 import { setToken } from '../utils/authSession';
 import { validateEmail, validatePassword } from '../utils/authValidation';
+import { getErrorMessage } from '../utils/errorMessage';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  const { showToast } = useToast();
 
   async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -37,9 +40,10 @@ export default function RegisterPage() {
     try {
       const result = await register({ displayName, email, password });
       setToken(result.token, result.expiresAt);
+      showToast({ kind: 'success', message: 'Your account is ready. Welcome to JobTrail!' });
       navigate('/dashboard', { replace: true });
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Something went wrong');
+      setError(getErrorMessage(error));
     }
   }
 

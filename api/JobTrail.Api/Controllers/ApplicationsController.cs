@@ -25,6 +25,12 @@ public class ApplicationsController(ApplicationService applicationService) : Con
         return File(await applicationService.ExportAsync(User.GetUserId(), rq, cancellationToken), "text/csv", "jobtrail-applications.csv");
     }
 
+    [HttpGet("duplicates")]
+    public async Task<ActionResult<List<DuplicateApplicationResponse>>> FindDuplicates([FromQuery] FindDuplicatesRequest rq, CancellationToken cancellationToken)
+    {
+        return Ok(await applicationService.FindDuplicatesAsync(User.GetUserId(), rq, cancellationToken));
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ApplicationResponse>> Get(Guid id, CancellationToken cancellationToken)
     {

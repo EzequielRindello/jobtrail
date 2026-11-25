@@ -1,5 +1,6 @@
+/* Inside the app layout: the header, the footer and .app-content (flex: 1) already fill the
+   screen, so the page needs no height of its own. */
 .not-found-page {
-  min-height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,28 +41,13 @@
   margin-bottom: 32px;
 }
 
-.not-found-button {
+/* "Go back" uses the text button of Export CSV (.applications-text-button); as a link it also
+   needs to center its text and drop the default underline. */
+.not-found-link {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-height: 50px;
-  padding: 0 28px;
-  border-radius: 8px;
-  background: var(--jt-primary);
-  color: var(--bg);
   font-size: 16px;
-  font-weight: 600;
   text-decoration: none;
-  transition: background 0.2s ease;
-}
-
-.not-found-button:hover {
-  background: var(--jt-primary-hover);
-}
-
-.not-found-button:focus-visible {
-  outline: 3px solid var(--jt-primary);
-  outline-offset: 3px;
 }
 
 @media (max-width: 600px) {

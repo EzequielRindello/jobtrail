@@ -74,12 +74,22 @@
 .auth-form input:focus {
   outline: none;
   border-color: var(--jt-primary);
-  box-shadow: 0 0 0 3px rgba(116, 64, 170, 0.1);
+  box-shadow: 0 0 0 3px var(--jt-focus-glow);
 }
 
-.auth-form input:-webkit-autofill {
+/* Same autofill fix as the forms in Applications.css: the inset shadow covers the browser's
+   gray-blue, and on focus the focus glow is kept next to it. */
+.auth-form input:-webkit-autofill,
+.auth-form input:-webkit-autofill:hover {
   -webkit-text-fill-color: var(--jt-text);
+  caret-color: var(--jt-text);
   box-shadow: 0 0 0 1000px var(--bg) inset;
+}
+
+.auth-form input:-webkit-autofill:focus {
+  box-shadow:
+    0 0 0 1000px var(--bg) inset,
+    0 0 0 3px var(--jt-focus-glow);
 }
 
 .auth-form button {
@@ -102,7 +112,7 @@
 }
 
 .auth-form button:focus-visible {
-  outline: 3px solid #bca4e0;
+  outline: 3px solid var(--jt-focus);
   outline-offset: 3px;
 }
 

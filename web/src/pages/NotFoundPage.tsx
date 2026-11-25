@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { isLoggedIn as hasSession } from '../utils/authSession';
+import '../styles/Applications.css';
 import '../styles/NotFoundPage.css';
 
 export default function NotFoundPage() {
@@ -16,8 +17,12 @@ export default function NotFoundPage() {
       <h2>Page not found</h2>
       <p>Sorry, the page you're looking for doesn't exist.</p>
 
-      <Link to={isLoggedIn ? '/dashboard' : '/login'} className="not-found-button">
-        {isLoggedIn ? 'Back to Dashboard' : 'Go to Login'}
+      {/* Signed in it goes back to the board, signed out to the login page. */}
+      <Link
+        to={isLoggedIn ? '/kanban' : '/login'}
+        className="applications-text-button not-found-link"
+      >
+        Go back
       </Link>
     </div>
   );

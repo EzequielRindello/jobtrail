@@ -15,9 +15,14 @@ export function setSessionExpiredHandler(handler: () => void) {
 }
 
 // fetch only fails by itself when there is no answer at all (server off, no network).
+// Every request sends the device's time zone, so the API counts days as the user's days.
 async function send(endpoint: string, init: RequestInit): Promise<Response> {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   try {
-    return await fetch(API_URL + endpoint, init);
+    return await fetch(API_URL + endpoint, {
+      ...init,
+      headers: { ...(init.headers as Record<string, string>), 'X-Time-Zone': timeZone },
+    });
   } catch {
     throw new Error(SERVER_UNAVAILABLE);
   }

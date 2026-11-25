@@ -100,12 +100,50 @@
 }
 
 .job-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   background: var(--bg);
   border: 1px solid var(--jt-border);
   border-radius: 10px;
-  padding: 8px 12px;
+  padding: 12px;
   margin-bottom: 10px;
   box-shadow: 0 3px 12px color-mix(in srgb, var(--jt-heading) 5%, transparent);
+}
+
+/* Company initial + title and company: the title is the first thing the eye reads. */
+.job-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.job-card-avatar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--jt-primary);
+  color: var(--jt-on-primary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.job-card-heading {
+  min-width: 0;
+}
+
+/* Date on the left, the phone "Move to" on the right, under a thin line. */
+.job-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--jt-border);
 }
 
 .job-card:hover {
@@ -117,38 +155,47 @@
   color: var(--jt-muted);
   font-size: 12px;
   font-weight: 500;
-  margin: 0 0 4px;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* Long titles stop at two lines; the full one is on the details page. */
 .job-card h3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   color: var(--jt-heading);
   font-size: 14px;
   font-weight: 600;
-  line-height: 1.5;
-  margin: 0 0 8px;
+  line-height: 1.4;
+  margin: 0 0 2px;
+  overflow-wrap: anywhere;
 }
 
-.job-card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 5px;
+/* The title is the link to the details page; it keeps the heading look. */
+.job-card-link {
+  color: inherit;
+  text-decoration: none;
 }
 
-.job-card-tag {
-  display: inline-block;
-  background: var(--jt-surface);
-  border: 1px solid var(--jt-border);
-  border-radius: 8px;
-  padding: 0 7px;
+.job-card-link:hover {
   color: var(--jt-primary);
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
+  text-decoration: underline;
 }
 
+.job-card-link:focus-visible {
+  outline: 3px solid var(--jt-focus);
+  outline-offset: 2px;
+}
+
+/* Always at the bottom right; on a phone "Move to" sits to its left. */
 .job-card-date {
   display: block;
+  order: 2;
+  margin-left: auto;
   color: var(--jt-muted);
   font-size: 12px;
 }
@@ -270,7 +317,7 @@
     display: flex;
     align-items: center;
     gap: 0px;
-    margin: 8px 0 0 auto;
+    margin: 0;
     padding: 4px 0;
     background: transparent;
     border: none;

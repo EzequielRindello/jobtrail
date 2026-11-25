@@ -61,20 +61,56 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.brand {
-  font-weight: 700;
-}
-
-.user {
-  margin-left: auto;
-  color: var(--muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* The brand and Log out keep their size; only the greeting shrinks. */
+.header > :not(.user) {
+  flex-shrink: 0;
   white-space: nowrap;
 }
 
+.brand {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* "Welcome, " stays whole and only the name shrinks. min-width: 0 lets flex items get
+   narrower than their text, which is what makes the ellipsis appear. */
+.user {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: pre;
+}
+
+.user-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tooltip with the full name, only set by popup.ts when the name is cut. */
+.user[data-full-name]:hover::after {
+  content: attr(data-full-name);
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 1;
+  width: max-content;
+  /* Narrow enough to stay inside the 340px popup, right aligned under the name. */
+  max-width: 220px;
+  padding: 6px 8px;
+  color: var(--surface);
+  background: var(--heading);
+  border-radius: 6px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.2);
+}
+
 main {
-  padding: 14px;
+  padding: 12px 14px;
 }
 
 h1 {
@@ -90,6 +126,12 @@ h1 {
   gap: 10px;
 }
 
+/* The form is the tallest screen: tighter gaps keep it under Chrome's 600px popup limit,
+   so it does not need a scrollbar. */
+#job-form {
+  gap: 8px;
+}
+
 label {
   display: flex;
   flex-direction: column;
@@ -99,8 +141,10 @@ label {
 
 input,
 textarea {
-  padding: 7px 9px;
+  padding: 6px 9px;
   font: inherit;
+  /* Labels are bold; what the user types should not be. */
+  font-weight: 400;
   color: var(--text);
   background: var(--field);
   border: 1px solid var(--border);
@@ -109,7 +153,6 @@ textarea {
 
 textarea {
   resize: vertical;
-  font-weight: 400;
 }
 
 input:focus,
@@ -151,6 +194,9 @@ button:disabled {
 }
 
 .link-button {
+  /* In a .stack it would stretch to full width and center its text; keep it left aligned
+     like the text around it. */
+  align-self: flex-start;
   padding: 0;
   font-weight: 400;
   color: var(--accent);
@@ -167,9 +213,23 @@ button:disabled {
   color: var(--muted);
 }
 
+.required-mark {
+  color: var(--error);
+}
+
 .error {
   margin: 0;
   color: var(--error);
+}
+
+.warning {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--text);
+  /* A light tint of the accent so the warning reads as a notice, not as an input. */
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 .board-link {

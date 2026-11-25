@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, createApplication, login, logout } from './api';
+import { ApiError, createApplication, findDuplicates, login, logout } from './api';
 
 const fetchMock = vi.fn();
 vi.stubGlobal('fetch', fetchMock);
@@ -56,6 +56,34 @@ describe('logout', () => {
 
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toMatch(/\/api\/auth\/logout$/);
+    expect(init.headers.Authorization).toBe('Bearer my-token');
+  });
+
+  it("sends the device's time zone so the API uses the user's day", async () => {
+    fetchMock.mockResolvedValue(jsonResponse(204));
+
+    await logout('my-token');
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init.headers['X-Time-Zone']).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  });
+});
+
+describe('findDuplicates', () => {
+  it('sends only the filled fields with the token', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, []));
+
+    await findDuplicates(
+      { title: 'Dev', company: '', url: 'https://jobs.example.com/1?a=b' },
+      'my-token',
+    );
+
+    const [url, init] = fetchMock.mock.calls[0];
+    const query = new URL(url).searchParams;
+    expect(query.get('url')).toBe('https://jobs.example.com/1?a=b');
+    expect(query.get('title')).toBe('Dev');
+    expect(query.has('company')).toBe(false);
+    expect(init.method).toBe('GET');
     expect(init.headers.Authorization).toBe('Bearer my-token');
   });
 });

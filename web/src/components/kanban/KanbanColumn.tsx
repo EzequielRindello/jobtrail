@@ -24,8 +24,8 @@ export default function KanbanColumn({ stage, title, applications, onMove }: Kan
           id={app.id}
           title={app.title}
           company={app.company}
-          location={app.location}
           appliedOn={app.appliedOn}
+          createdAt={app.createdAt}
           stage={app.stage}
           onMove={onMove}
         />
