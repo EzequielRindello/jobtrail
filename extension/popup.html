@@ -8,7 +8,10 @@
   <body>
     <header class="header">
       <span class="brand">JobTrail</span>
-      <span id="user-name" class="user" hidden></span>
+      <!-- Only the name is cut when it does not fit; the tooltip then shows it whole. -->
+      <span id="user-greeting" class="user" hidden
+        >Welcome, <span id="user-name" class="user-name"></span
+      ></span>
       <button id="logout-button" class="link-button" type="button" hidden>Log out</button>
     </header>
 
@@ -38,16 +41,20 @@
           Enter it manually
         </button>
 
+        <!-- Shown instead of the form when this job looks already saved. -->
+        <p id="duplicate-warning" class="warning" role="status" hidden></p>
+        <button id="proceed-button" type="button" hidden>Save anyway</button>
+
         <!-- The job found on the page. Every field can be fixed before saving. -->
         <form id="job-form" class="stack" novalidate hidden>
           <h1>Check the job before saving</h1>
           <label>
-            Title *
+            <span>Title <span class="required-mark" aria-hidden="true">*</span></span>
             <input id="job-title" type="text" autocomplete="off" />
             <span id="job-title-error" class="field-error" hidden></span>
           </label>
           <label>
-            Company *
+            <span>Company <span class="required-mark" aria-hidden="true">*</span></span>
             <input id="job-company" type="text" autocomplete="off" />
             <span id="job-company-error" class="field-error" hidden></span>
           </label>
@@ -68,7 +75,7 @@
           </label>
           <label>
             Description
-            <textarea id="job-description" rows="5"></textarea>
+            <textarea id="job-description" rows="4"></textarea>
             <span id="job-description-error" class="field-error" hidden></span>
           </label>
           <button id="save-button" type="submit">Save to board</button>

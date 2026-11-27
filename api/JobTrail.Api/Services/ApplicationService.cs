@@ -25,11 +25,13 @@ public class ApplicationService
 
     private readonly AppDbContext _db;
     private readonly TimeProvider _timeProvider;
+    private readonly ClientTimeZone _clientTimeZone;
 
-    public ApplicationService(AppDbContext db, TimeProvider timeProvider)
+    public ApplicationService(AppDbContext db, TimeProvider timeProvider, ClientTimeZone clientTimeZone)
     {
         _db = db;
         _timeProvider = timeProvider;
+        _clientTimeZone = clientTimeZone;
     }
 
     #endregion
@@ -46,6 +48,29 @@ public class ApplicationService
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<DuplicateApplicationResponse>> FindDuplicatesAsync(Guid userId, FindDuplicatesRequest rq, CancellationToken cancellationToken)
+    {
+        // Used by the extension before saving: the same link, or the same title and company
+        // (the same job found on another site), ignoring case. Exact link matches come first.
+        var url = Clean(rq.Url);
+        var title = Clean(rq.Title)?.ToLower();
+        var company = Clean(rq.Company)?.ToLower();
+        if (url is null && (title is null || company is null))
+        {
+            return [];
+        }
+
+        var matches = await _db.Applications
+            .Where(a => a.UserId == userId
+                && ((url != null && a.Url == url)
+                    || (title != null && company != null && a.Title.ToLower() == title && a.Company.ToLower() == company)))
+            .OrderByDescending(a => a.CreatedAt)
+            .Select(a => new DuplicateApplicationResponse(a.Id, a.Title, a.Company, a.Stage, url != null && a.Url == url))
+            .ToListAsync(cancellationToken);
+
+        return [.. matches.OrderByDescending(m => m.SameLink)];
+    }
+
     public async Task<ApplicationResponse> GetAsync(Guid userId, Guid applicationId, CancellationToken cancellationToken)
     {
         var application = await _db.Applications
@@ -60,7 +85,7 @@ public class ApplicationService
     {
         ValidateSave(rq);
 
-        var now = _timeProvider.GetUtcNow();
+        var now = GetNow();
         var application = new Application
         {
             Id = Guid.CreateVersion7(),
@@ -85,7 +110,7 @@ public class ApplicationService
 
         var application = await FindAsync(userId, applicationId, cancellationToken);
         CopyDetails(rq, application);
-        application.UpdatedAt = _timeProvider.GetUtcNow();
+        application.UpdatedAt = GetNow();
 
         await _db.SaveChangesAsync(cancellationToken);
 
@@ -113,7 +138,7 @@ public class ApplicationService
             return CreateResponse(application);
         }
 
-        var now = _timeProvider.GetUtcNow();
+        var now = GetNow();
         // Added through the DbSet: a new row with its id already set, found only through the
         // navigation, would be taken for an existing one and updated instead of inserted.
         _db.ApplicationStageChanges.Add(CreateStageChange(application, application.Stage, rq.Stage, now));
@@ -205,6 +230,15 @@ public class ApplicationService
 
     #region Private Helpers
 
+    // PostgreSQL keeps microseconds and .NET keeps 100 ns ticks. Cutting the extra digit here makes
+    // the answer of a save equal to what a later read returns, so the web does not see a change
+    // that never happened (the board's "New updates available" compares these dates).
+    private DateTimeOffset GetNow()
+    {
+        var now = _timeProvider.GetUtcNow();
+        return now.AddTicks(-(now.Ticks % TimeSpan.TicksPerMicrosecond));
+    }
+
     private async Task<Application> FindAsync(Guid userId, Guid applicationId, CancellationToken cancellationToken)
     {
         return await _db.Applications
@@ -235,7 +269,7 @@ public class ApplicationService
         return query;
     }
 
-    private static string?[] CreateCsvRow(Application application)
+    private string?[] CreateCsvRow(Application application)
     {
         return
         [
@@ -245,7 +279,7 @@ public class ApplicationService
             application.Url,
             application.Stage.ToString(),
             application.AppliedOn?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-            application.CreatedAt.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            _clientTimeZone.ToLocalDate(application.CreatedAt).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             application.SalaryRange,
             application.ContactName,
             application.ContactEmail,
@@ -272,18 +306,18 @@ public class ApplicationService
             : value;
     }
 
-    private static IQueryable<Application> FilterByCreatedAt(IQueryable<Application> query, DateOnly? from, DateOnly? to)
+    private IQueryable<Application> FilterByCreatedAt(IQueryable<Application> query, DateOnly? from, DateOnly? to)
     {
-        // Days are UTC days: "to" includes the whole day, up to the start of the next one.
+        // Days are the user's days: "to" includes the whole day, up to the start of the next one.
         if (from is not null)
         {
-            var start = ToUtcStartOfDay(from.Value);
+            var start = _clientTimeZone.StartOfDay(from.Value);
             query = query.Where(a => a.CreatedAt >= start);
         }
 
         if (to is not null)
         {
-            var end = ToUtcStartOfDay(to.Value.AddDays(1));
+            var end = _clientTimeZone.StartOfDay(to.Value.AddDays(1));
             query = query.Where(a => a.CreatedAt < end);
         }
 
@@ -321,11 +355,12 @@ public class ApplicationService
     }
 
     // Creating it in Applied, or moving it there, dates the application if the user did not.
-    private static void SetAppliedOnIfApplied(Application application, DateTimeOffset now)
+    // The date is the user's today, not the UTC one.
+    private void SetAppliedOnIfApplied(Application application, DateTimeOffset now)
     {
         if (application.Stage == ApplicationStage.Applied && application.AppliedOn is null)
         {
-            application.AppliedOn = DateOnly.FromDateTime(now.UtcDateTime);
+            application.AppliedOn = _clientTimeZone.ToLocalDate(now);
         }
     }
 
@@ -398,11 +433,6 @@ public class ApplicationService
         return email.Length <= ApplicationLimits.ContactEmail
             && MailAddress.TryCreate(email, out var address)
             && address.Address == email;
-    }
-
-    private static DateTimeOffset ToUtcStartOfDay(DateOnly day)
-    {
-        return new DateTimeOffset(day.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
     }
 
     private static ApiException NotFoundException()

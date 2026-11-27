@@ -1,13 +1,20 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { login } from '../api/authApi';
+import { useToast } from '../hooks/useToast';
 import '../styles/AuthPages.css';
 import { setToken } from '../utils/authSession';
 import { validateEmail } from '../utils/authValidation';
+import { getErrorMessage } from '../utils/errorMessage';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const redirectLocation = location.state?.from;
+
   const [error, setError] = useState('');
+  const { showToast } = useToast();
 
   async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -24,10 +31,18 @@ export default function LoginPage() {
 
     try {
       const result = await login({ email, password });
-      setToken(result.token);
-      navigate('/kanban');
+      setToken(result.token, result.expiresAt);
+      showToast({ kind: 'success', message: 'Welcome back!' });
+      navigate(
+        redirectLocation
+          ? `${redirectLocation.pathname}${redirectLocation.search}${redirectLocation.hash}`
+          : '/dashboard',
+        {
+          replace: true,
+        },
+      );
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Something went wrong');
+      setError(getErrorMessage(error));
     }
   }
 

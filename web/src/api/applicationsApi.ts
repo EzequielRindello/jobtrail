@@ -1,6 +1,8 @@
 import { apiDownload, apiRequest } from './client';
 import type {
+  ApplicationDetails,
   ApplicationFilterValues,
+  SaveApplicationRequest,
   ApplicationSummary,
   CreateApplicationRequest,
   ApplicationStage,
@@ -63,6 +65,19 @@ export async function exportApplications(filters: ApplicationFilterValues) {
 
 export async function createApplication(data: CreateApplicationRequest) {
   return apiRequest<ApplicationSummary>('/api/applications', data);
+}
+
+export async function getApplication(id: string) {
+  return apiRequest<ApplicationDetails>(`/api/applications/${id}`, undefined, 'GET');
+}
+
+export async function saveApplication(id: string, data: SaveApplicationRequest) {
+  return apiRequest<ApplicationDetails>(`/api/applications/${id}`, data, 'PUT');
+}
+
+// The API deletes its stage history too.
+export async function deleteApplication(id: string) {
+  await apiRequest(`/api/applications/${id}`, undefined, 'DELETE');
 }
 
 // Updates an application stage

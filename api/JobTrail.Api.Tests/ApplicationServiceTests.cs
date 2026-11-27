@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using JobTrail.Api.Contracts.Applications;
 using JobTrail.Api.Data;
@@ -12,17 +13,24 @@ namespace JobTrail.Api.Tests;
 
 public class ApplicationServiceTests : IDisposable
 {
+    private const string Argentina = "America/Argentina/Buenos_Aires";
+
     private static readonly Guid Me = Guid.NewGuid();
     private static readonly Guid SomeoneElse = Guid.NewGuid();
     private static readonly DateOnly Today = DateOnly.FromDateTime(TestHelpers.Now.UtcDateTime);
 
+    // 22:00 on Nov 10 in Buenos Aires (UTC-3) is already Nov 11 in UTC.
+    private static readonly DateTimeOffset LateAtNightInArgentina = new(2026, 11, 11, 1, 0, 0, TimeSpan.Zero);
+    private static readonly DateOnly ArgentinaDay = new(2026, 11, 10);
+    private static readonly DateOnly UtcDay = new(2026, 11, 11);
+
     private readonly AppDbContext db = TestHelpers.CreateDbContext();
     private readonly FakeTimeProvider clock = TestHelpers.CreateClock();
-    private readonly ApplicationService applicationService;
+    private ApplicationService applicationService;
 
     public ApplicationServiceTests()
     {
-        applicationService = new ApplicationService(db, clock);
+        applicationService = CreateService(null);
     }
 
     public void Dispose()
@@ -83,6 +91,31 @@ public class ApplicationServiceTests : IDisposable
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
         Assert.Equal(["company", "contactEmail", "notes", "title", "url"], ex.Errors!.Keys.Order());
         Assert.Empty(db.Applications);
+    }
+
+    [Fact]
+    public async Task FindDuplicates_MatchesTheLinkOrTheTitleAndCompanyOfMyApplications()
+    {
+        await applicationService.CreateAsync(Me, new CreateApplicationRequest { Title = "Backend Developer", Company = "Fictional Labs", Url = "https://other.example.com/9" }, CancellationToken.None);
+        await applicationService.CreateAsync(Me, new CreateApplicationRequest { Title = "Data Analyst", Company = "Beta Fictional", Url = "https://jobs.example.com/1" }, CancellationToken.None);
+        await applicationService.CreateAsync(Me, new CreateApplicationRequest { Title = "Designer", Company = "Fictional Labs" }, CancellationToken.None);
+        await applicationService.CreateAsync(SomeoneElse, new CreateApplicationRequest { Title = "Backend Developer", Company = "Fictional Labs", Url = "https://jobs.example.com/1" }, CancellationToken.None);
+
+        var rq = new FindDuplicatesRequest { Url = " https://jobs.example.com/1 ", Title = "backend developer", Company = "FICTIONAL LABS" };
+        var results = await applicationService.FindDuplicatesAsync(Me, rq, CancellationToken.None);
+
+        Assert.Equal(["Data Analyst", "Backend Developer"], results.Select(r => r.Title));
+        Assert.Equal([true, false], results.Select(r => r.SameLink));
+    }
+
+    [Fact]
+    public async Task FindDuplicates_ReturnsNothingWithoutALinkOrATitleAndCompany()
+    {
+        await applicationService.CreateAsync(Me, new CreateApplicationRequest { Title = "Backend Developer", Company = "Fictional Labs" }, CancellationToken.None);
+
+        var results = await applicationService.FindDuplicatesAsync(Me, new FindDuplicatesRequest { Title = "Backend Developer" }, CancellationToken.None);
+
+        Assert.Empty(results);
     }
 
     [Fact]
@@ -223,6 +256,19 @@ public class ApplicationServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task ChangeStage_ReturnsDatesWithTheDatabasePrecision()
+    {
+        var created = await CreateAsync(Me, "Backend Developer", "Fictional Labs");
+        // 1.2345678 seconds: the last digit (100 ns) is finer than PostgreSQL's microseconds.
+        clock.Advance(TimeSpan.FromTicks(12_345_678));
+
+        var response = await applicationService.ChangeStageAsync(Me, created.Id, new ChangeStageRequest { Stage = ApplicationStage.Applied }, CancellationToken.None);
+
+        Assert.Equal(0, response.UpdatedAt.Ticks % TimeSpan.TicksPerMicrosecond);
+        Assert.Equal(TestHelpers.Now.AddTicks(12_345_670), response.UpdatedAt);
+    }
+
+    [Fact]
     public async Task ChangeStage_ToTheSameStage_AddsNoHistory()
     {
         var created = await CreateAsync(Me, "Backend Developer", "Fictional Labs");
@@ -291,6 +337,71 @@ public class ApplicationServiceTests : IDisposable
         var bytes = await applicationService.ExportAsync(Me, new SearchApplicationsRequest(), CancellationToken.None);
 
         Assert.Equal([0xEF, 0xBB, 0xBF], bytes[..3]);
+    }
+
+    [Theory]
+    [InlineData(Argentina, "2026-11-10")]
+    [InlineData(null, "2026-11-11")]
+    [InlineData("Not/AZone", "2026-11-11")]
+    public async Task Create_InAppliedLateAtNight_UsesTheClientsDay(string? timeZone, string expected)
+    {
+        applicationService = CreateService(timeZone);
+        clock.SetUtcNow(LateAtNightInArgentina);
+
+        var response = await CreateAsync(Me, "QA Engineer", "Example Co", ApplicationStage.Applied);
+
+        Assert.Equal(DateOnly.Parse(expected, CultureInfo.InvariantCulture), response.AppliedOn);
+    }
+
+    [Fact]
+    public async Task ChangeStage_ToAppliedLateAtNight_UsesTheClientsDay()
+    {
+        applicationService = CreateService(Argentina);
+        clock.SetUtcNow(LateAtNightInArgentina);
+        var created = await CreateAsync(Me, "Backend Developer", "Fictional Labs");
+
+        var response = await applicationService.ChangeStageAsync(Me, created.Id, new ChangeStageRequest { Stage = ApplicationStage.Applied }, CancellationToken.None);
+
+        Assert.Equal(ArgentinaDay, response.AppliedOn);
+    }
+
+    [Fact]
+    public async Task Search_BySavedDateLateAtNight_UsesTheClientsDay()
+    {
+        applicationService = CreateService(Argentina);
+        clock.SetUtcNow(LateAtNightInArgentina);
+        await CreateAsync(Me, "Saved at night", "Example Co");
+
+        var sameDay = await applicationService.SearchAsync(Me, new SearchApplicationsRequest { From = ArgentinaDay, To = ArgentinaDay }, CancellationToken.None);
+        var nextDay = await applicationService.SearchAsync(Me, new SearchApplicationsRequest { From = UtcDay, To = UtcDay }, CancellationToken.None);
+
+        Assert.Equal("Saved at night", Assert.Single(sameDay).Title);
+        Assert.Empty(nextDay);
+    }
+
+    [Fact]
+    public async Task Export_SavedOnLateAtNight_UsesTheClientsDay()
+    {
+        applicationService = CreateService(Argentina);
+        clock.SetUtcNow(LateAtNightInArgentina);
+        await CreateAsync(Me, "Saved at night", "Example Co");
+
+        var lines = ReadCsv(await applicationService.ExportAsync(Me, new SearchApplicationsRequest(), CancellationToken.None));
+
+        Assert.Equal("2026-11-10", lines[1].Split(',')[6]);
+    }
+
+    // A service as it runs for one request, with the X-Time-Zone header the client sent (null = no header).
+    private ApplicationService CreateService(string? timeZone)
+    {
+        var context = new DefaultHttpContext();
+        if (timeZone is not null)
+        {
+            context.Request.Headers[ClientTimeZone.HeaderName] = timeZone;
+        }
+
+        var clientTimeZone = new ClientTimeZone(new HttpContextAccessor { HttpContext = context });
+        return new ApplicationService(db, clock, clientTimeZone);
     }
 
     private static string[] ReadCsv(byte[] bytes)

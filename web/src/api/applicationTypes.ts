@@ -29,6 +29,42 @@ export interface ApplicationFilterValues {
   to: string;
 }
 
+// One row of an application's stage history. The first row has no fromStage (it was created).
+export interface StageChange {
+  fromStage: ApplicationStage | null;
+  toStage: ApplicationStage;
+  changedAt: string;
+}
+
+// Everything stored about one application (GET /api/applications/{id}).
+export interface ApplicationDetails extends ApplicationSummary {
+  url: string | null;
+  description: string | null;
+  salaryRange: string | null;
+  contactName: string | null;
+  contactEmail: string | null;
+  resumeVersion: string | null;
+  notes: string | null;
+  // Oldest first.
+  history: StageChange[];
+}
+
+// The body of PUT /api/applications/{id}. It replaces every field, so a field left out is
+// cleared. The stage is not here: it changes only from the board.
+export interface SaveApplicationRequest {
+  title: string;
+  company: string;
+  location: string | null;
+  url: string | null;
+  description: string | null;
+  salaryRange: string | null;
+  contactName: string | null;
+  contactEmail: string | null;
+  resumeVersion: string | null;
+  notes: string | null;
+  appliedOn: string | null;
+}
+
 // Only title and company are required; the other fields are left out when empty.
 export interface CreateApplicationRequest {
   title: string;

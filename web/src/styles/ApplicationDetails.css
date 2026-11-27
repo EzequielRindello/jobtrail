@@ -1,0 +1,321 @@
+/* Application details page (/applications/:id).
+   A centered container (like Bootstrap's .container) that uses the width it has up to 1140px:
+   the job description is the main column and the details and history sit in a side column. */
+.details-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+}
+
+.details-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  color: var(--jt-primary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.details-back:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Header: title and company on the left, actions on the right, a line under it. */
+.details-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--jt-border);
+}
+
+.details-header h1 {
+  margin: 0 0 6px;
+  color: var(--jt-heading);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.details-subtitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--jt-muted);
+  font-size: 15px;
+}
+
+.details-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-bottom: 6px;
+}
+
+.details-title-row h1 {
+  margin: 0;
+}
+
+/* A soft tint of the brand color: it labels the title without competing with it. */
+.details-stage {
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--jt-primary) 12%, var(--bg));
+  color: var(--jt-primary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  /* Optical centering: the title's letters sit low in its line box (empty space above the
+     capitals, mostly lowercase letters), so the pill moves 2px down to line up with them. */
+  position: relative;
+  top: 2px;
+}
+
+.details-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+/* Main column + a side column of fixed width that stays in view while the description scrolls. */
+.details-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 48px;
+  align-items: start;
+}
+
+.details-main h2,
+.details-panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  color: var(--jt-heading);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* The description reads like an article: a comfortable line length, no inner scroll. */
+.details-description {
+  max-width: 78ch;
+  margin: 0;
+  color: var(--jt-text);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.details-text {
+  white-space: pre-wrap;
+}
+
+.details-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 24px;
+  border: 1px dashed var(--jt-border);
+  border-radius: 12px;
+  color: var(--jt-muted);
+  font-size: 14px;
+}
+
+.details-placeholder p {
+  margin: 0;
+}
+
+.details-side {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.details-panel {
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--jt-surface);
+}
+
+.details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+
+.details-row {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  gap: 12px;
+  font-size: 14px;
+}
+
+.details-row dt {
+  color: var(--jt-muted);
+}
+
+.details-row dd {
+  margin: 0;
+  color: var(--jt-text);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.details-row a {
+  color: var(--jt-primary);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+/* "Not set: Salary, Contact. Add" under the list, quieter than the real values. */
+.details-missing {
+  margin: 14px 0 0;
+  color: var(--jt-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.details-list + .details-missing {
+  padding-top: 14px;
+  border-top: 1px solid var(--jt-border);
+}
+
+.details-inline-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--jt-primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.details-inline-button:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.details-count {
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--jt-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.details-show-all {
+  margin-bottom: 12px;
+}
+
+/* Timeline: a thin line with a dot per change. */
+.details-history {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.details-history li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 0 16px 22px;
+}
+
+.details-history li::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--jt-primary);
+}
+
+.details-history li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 18px;
+  bottom: 2px;
+  left: 4px;
+  width: 1px;
+  background: var(--jt-border);
+}
+
+.details-history li:last-child {
+  padding-bottom: 0;
+}
+
+.details-history-stage {
+  color: var(--jt-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.details-history time {
+  color: var(--jt-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.details-back:focus-visible,
+.details-inline-button:focus-visible,
+.details-row a:focus-visible {
+  outline: 3px solid var(--jt-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.details-form {
+  max-width: none;
+}
+
+/* Tablet and phone: one column, details and history first, then the description. */
+@media (max-width: 900px) {
+  .details-layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .details-side {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .details-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .details-header h1 {
+    font-size: 25px;
+  }
+
+  .details-form .applications-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

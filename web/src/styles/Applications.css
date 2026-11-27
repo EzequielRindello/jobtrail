@@ -75,7 +75,7 @@
 }
 
 .applications-text-button:focus-visible {
-  outline: 3px solid #bca4e0;
+  outline: 3px solid var(--jt-focus);
   outline-offset: 2px;
 }
 
@@ -89,7 +89,7 @@
 .applications-primary:focus-visible,
 .applications-secondary:focus-visible,
 .applications-danger:focus-visible {
-  outline: 3px solid #bca4e0;
+  outline: 3px solid var(--jt-focus);
   outline-offset: 3px;
 }
 
@@ -157,7 +157,7 @@
 }
 
 .applications-modal-close:focus-visible {
-  outline: 3px solid #bca4e0;
+  outline: 3px solid var(--jt-focus);
   outline-offset: 2px;
 }
 
@@ -196,6 +196,11 @@
   font-weight: 600;
 }
 
+/* The * of required fields, in the error color so it stands out from the label. */
+.required-mark {
+  color: var(--jt-error);
+}
+
 .applications-field input,
 .applications-field select,
 .applications-field textarea {
@@ -215,14 +220,21 @@
   height: 38px;
 }
 
-/* Picking a value the browser remembered paints the field with its own gray-blue. Keep the
-   field's white background and text color: the long transition delays the browser's color
-   without touching the focus ring (same fix as the login form in AuthPages.css). */
+/* Picking a value the browser remembered paints the field with its own gray-blue, and CSS
+   cannot change that background. A large inset shadow covers it with the field's own color;
+   on focus the focus glow is added next to it, so the ring still shows. */
 .applications-field input:-webkit-autofill,
-.applications-field input:-webkit-autofill:hover,
+.applications-field input:-webkit-autofill:hover {
+  -webkit-text-fill-color: var(--jt-text);
+  caret-color: var(--jt-text);
+  box-shadow: 0 0 0 1000px var(--bg) inset;
+}
+
 .applications-field input:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--jt-text);
-  transition: background-color 9999s ease-out 0s;
+  box-shadow:
+    0 0 0 1000px var(--bg) inset,
+    0 0 0 3px var(--jt-focus-glow);
 }
 
 /* The browser's own select arrow looks different in every browser, so it is replaced by
@@ -246,11 +258,13 @@
 .applications-field textarea:focus {
   outline: none;
   border-color: var(--jt-primary);
-  box-shadow: 0 0 0 3px rgba(116, 64, 170, 0.1);
+  box-shadow: 0 0 0 3px var(--jt-focus-glow);
 }
 
+/* Modal buttons sit on the right, always Cancel first and the action last. */
 .applications-form-actions {
   display: flex;
+  justify-content: flex-end;
   gap: 12px;
 }
 

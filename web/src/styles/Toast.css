@@ -1,0 +1,105 @@
+/* Toasts: one fixed region at the top right, above every page (and over the header). */
+.toast-region {
+  position: fixed;
+  top: 16px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(380px, calc(100vw - 48px));
+}
+
+/* Solid color per kind. Each kind sets --toast-bg and --toast-text, and the message, the
+   action and the close button all use --toast-text, so the text always matches its background. */
+.toast {
+  --toast-bg: var(--jt-primary);
+  --toast-text: var(--jt-on-primary);
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px 10px 16px;
+  border-radius: 8px;
+  background: var(--toast-bg);
+  box-shadow: var(--shadow);
+  color: var(--toast-text);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  animation: toast-in 0.2s ease-out;
+}
+
+.toast-success {
+  --toast-bg: var(--jt-success);
+  --toast-text: var(--jt-on-success);
+}
+
+.toast-error {
+  --toast-bg: var(--jt-error);
+  --toast-text: var(--jt-on-error);
+}
+
+.toast-message {
+  flex: 1;
+  margin: 0;
+  color: inherit;
+}
+
+.toast-action,
+.toast-close {
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.toast-action {
+  padding: 4px 10px;
+  border: 1px solid currentColor;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.toast-close {
+  display: flex;
+  padding: 4px;
+}
+
+/* A light layer of the text color, so the hover works on every background. */
+.toast-action:hover,
+.toast-close:hover {
+  background: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+/* The outline uses the text color: the usual focus color would not show on a solid toast. */
+.toast-action:focus-visible,
+.toast-close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}
+
+/* Phone: full width at the top. */
+@media (max-width: 600px) {
+  .toast-region {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+}
